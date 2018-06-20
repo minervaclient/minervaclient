@@ -6,7 +6,7 @@
 # (C) Copyright 2018-2019 Ryan B Au
 
 
-from minervaclient import reg,sched,exams,transcript
+from minervaclient import reg,sched,exams,transcript,pub_search
 from minervaclient.minerva_common import *
 from minervaclient import config,credentials_local
 
@@ -58,6 +58,18 @@ def parse_transcript(subp):
 	parser.add_argument("-v", "--verbose", help="Show details about the HTTP requests sent to Minerva",action="store_true")
 	parser.set_defaults(which='transcript')
 
+def parse_search(subp):
+	parser = subp.add_parser('search',help='Search for a course')
+	parser.add_argument("-t","--term",help="The term (e.g. FALL2016, 201609, etc.) in which to register for these courses",required=True)
+	parser.add_argument("-L", "--lecture-only", help="Show only courses that are Lecture types",action="store_true")
+	parser.add_argument("-T", "--tutorial-only", help="Show only courses that are Tutorial types",action="store_true")
+	parser.add_argument("-A", "--availability-only", help="Show only availability information",action="store_true")
+	parser.add_argument("-v", "--verbose", help="Show details about the HTTP requests sent to Minerva",action="store_true")
+	parser.add_argument("-q","--quiet",help="[TODO] Only print output for successful registration",action="store_true")
+	parser.add_argument('course',nargs='+',help="A series of full course codes or general course codes (POLI-244-001 COMP-251-002 FACC-100) ")
+	parser.set_defaults(which='search')
+
+
 def main():
 	ap = argparse.ArgumentParser()
 	subp = ap.add_subparsers(help = 'Minervaclient subcommands')
@@ -65,6 +77,7 @@ def main():
 	parse_reg(subp)
 	parse_sched(subp)
 	parse_transcript(subp)
+	parse_search(subp)
 
 	args = ap.parse_args()
 
@@ -78,6 +91,8 @@ def main():
 		exec_sched(args)
 	elif args.which == 'transcript':
 		exec_transcript(args)
+	elif args.which == 'search':
+		exec_search(args)
 
 def course_ref_type(arg):
 	return arg[0].isalpha()
@@ -209,6 +224,27 @@ def exec_transcript(args):
 
 	transcript.get_transcript(terms,report,show)
 
+def exec_search(args):
+	codes_given = course_ref_type(args.course[0])
+	term = get_term_code(args.term)
+	
+	# for course in args.course:
+	# 	if codes_given != course_ref_type(course):
+	# 		print "\033[1;31mERROR:\033[0m Course codes cannot be combined with CRNs"
+	# 		sys.exit(MinervaError.user_error)
+	courses = args.course
+	print courses
+	cType = ""
+	if(args.lecture_only):
+		cType = "Lecture"
+	elif(args.tutorial_only):
+		cType = "Tutorial"
+	
+	pub_search.print_search(term, courses, cType, avail=args.availability_only)
+	#lecture-only
+	#tutorial-only
+	#availability-only
+	
 main()
 
 

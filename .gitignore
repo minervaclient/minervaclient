@@ -8,3 +8,6 @@ state.dat
 *.mp4
 .DS_Store
 *.out
+*.egg-info
+build/
+dist/

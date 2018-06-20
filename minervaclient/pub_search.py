@@ -55,6 +55,67 @@ def search(term,course_codes):
 	result = requests.post("https://horizon.mcgill.ca/rm-PBAN1/bwckgens.csv",request)
 	return parse_results(result.text)
 
+def quick_search(term,course_codes, cType=""):
+	#TODO: waitlist, availability, tutorials/lectures, 
+	courses_obj = search(term,course_codes)
+	# for key, value in courses_obj.items():
+	# 	for course_code in course_codes:
+	# 		if(course_code in key):
+	# 			print parse_course_info(value)
+	
+	# find all of the full course codes that exist in from the search query
+	final_codes = []
+	full_codes = []
+	for course_code in course_codes:
+		counter = 1
+		if(course_code in courses_obj):
+			full_codes.append(course_code)
+			continue
+		else:
+			full_code = course_code[:8] + str(counter).join("-000".rsplit('0'*len(str(counter)),1))
+		
+		while (full_code in courses_obj) and (counter <= 999):
+			full_codes.append(full_code)
+			counter += 1 
+			full_code = course_code[:8] + str(counter).join("-000".rsplit('0'*len(str(counter)),1))
+
+	for full_code in full_codes:
+		aType = courses_obj[full_code]['type']
+		if (cType in aType):
+			final_codes.append(full_code)
+
+	return (final_codes, courses_obj)
+
+def print_search(term,course_codes, cType, avail=False):
+	# print out all of the courses and their variations really nicely
+	full_codes, courses_obj = quick_search(term,course_codes, cType)
+	# print full_codes
+	full_codes.sort()
+
+	for full_code in full_codes:
+		course = courses_obj[full_code]
+		if(avail):
+			print str(course['_code']),
+			print " CRN: %-6s" % (str(course['crn'])),
+			print " Seats Remaining: %-8s" % ( str(course['wait']['rem']) +"/" + str(course['wait']['cap']) ),
+			print " Waitlist: %-8s" % ( str(course['wl_rem']) + "/" +str(course['wl_cap']) )
+		else:
+			print parse_course_info(course)
+
+def parse_course_info(e):
+	result = [
+		e['title'],
+		e['type'] +" Instructor: "+ e['instructor'] +" | Credits: "+str( e['credits'] ) ,
+		str(e['_code']) + " CRN: "+ str(e['crn']) + " Seats Remaining: " + str(e['wait']['rem']) +"/" + str(e['wait']['cap']) + " Waitlist: " + str(e['wl_rem']) + "/" +str(e['wl_cap']),
+		e['location'] + " " + e['days'] + " " + e['time'] + " Period: " + e['date'],
+		""		
+	]
+	result0 = ""
+	for key,value in e.items():
+		result0 += key + "=>" + str(value) + " "
+	# return "\n".join(result)
+	return "\n".join(result)
+
 
 def parse_results(text):
 	stream = StringIO.StringIO(text.encode("ascii","ignore"))
