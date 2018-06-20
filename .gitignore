@@ -9,5 +9,6 @@ state.dat
 .DS_Store
 *.out
 *.egg-info
+
 build/
 dist/
