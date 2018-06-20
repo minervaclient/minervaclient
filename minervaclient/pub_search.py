@@ -2,6 +2,7 @@
 # This file is from Minervac, a command-line client for Minerva
 # <http://npaun.ca/projects/minervac>
 # (C) Copyright 2016-2017 Nicholas Paun
+# (C) Copyright 2018-2019 Ryan B Au
 
 import requests,urllib,StringIO,csv,sys
 from minerva_common import *
@@ -55,15 +56,19 @@ def search(term,course_codes):
 	result = requests.post("https://horizon.mcgill.ca/rm-PBAN1/bwckgens.csv",request)
 	return parse_results(result.text)
 
-def quick_search(term,course_codes, cType=""):
+def quick_search(term, course_codes, course_type=""):
+	"""term is in the form of 201809 where 2018 is the year (2016, 2017...), and 09 is for Fall (01 for Winter, 05 for Summer)
+	course_codes is a list and elements may come in the form of:
+		general course code, like COMP-202, to retrieve all different sections of it (eg. COMP-202-001, COMP-202-002...)
+			AND/OR
+		a specific course code with its section number, can be given (eg. COMP-202-001)
+	valid course_type values include Lecture, Tutorial, or any other similar type"""
 	#TODO: waitlist, availability, tutorials/lectures, 
+
+	# get the course data from Minerva. includes all of the courses that share the same subject(s) as the course_codes parameter
 	courses_obj = search(term,course_codes)
-	# for key, value in courses_obj.items():
-	# 	for course_code in course_codes:
-	# 		if(course_code in key):
-	# 			print parse_course_info(value)
 	
-	# find all of the full course codes that exist in from the search query
+	# find all of the full course codes that exist in the search query
 	final_codes = []
 	full_codes = []
 	for course_code in course_codes:
@@ -79,30 +84,37 @@ def quick_search(term,course_codes, cType=""):
 			counter += 1 
 			full_code = course_code[:8] + str(counter).join("-000".rsplit('0'*len(str(counter)),1))
 
+	# only keep course codes of a specified type as defined by course_type, or leave it an empty string to get all
 	for full_code in full_codes:
 		aType = courses_obj[full_code]['type']
-		if (cType in aType):
+		if (course_type in aType):
 			final_codes.append(full_code)
 
+	# a tuple of the relevant course codes (eg. COMP-200-001 CCOM-206-018 ...) and the courses object retrieved from Minerva
+	# the courses object contains all of the courses with the same subject (eg. COMP, ECSE, POLI) in a dictionary 
+	# with keys in the form of course codes
 	return (final_codes, courses_obj)
 
-def print_search(term,course_codes, cType, avail=False):
-	# print out all of the courses and their variations really nicely
+def print_search(term,course_codes, cType, avail=False, verbose=False, Debug=False):
+	# print out all of the courses and their variations really nicely for the command line interface
 	full_codes, courses_obj = quick_search(term,course_codes, cType)
-	# print full_codes
+	if(Debug):
+		print full_codes + "\n"
 	full_codes.sort()
 
 	for full_code in full_codes:
 		course = courses_obj[full_code]
-		if(avail):
+		if(avail and not (verbose or Debug)):
 			print str(course['_code']),
 			print " CRN: %-6s" % (str(course['crn'])),
 			print " Seats Remaining: %-8s" % ( str(course['wait']['rem']) +"/" + str(course['wait']['cap']) ),
 			print " Waitlist: %-8s" % ( str(course['wl_rem']) + "/" +str(course['wl_cap']) )
 		else:
-			print parse_course_info(course)
+			print beautify_course_info(course, (verbose or Debug))
 
-def parse_course_info(e):
+def beautify_course_info(e, Debug=False):
+	# accept a specific course's information in the form of a dictionary and formats it to look nice for the command line interface. 
+	# set Debug to True to see the all of the original keys and values paired together concatenated to the end of the original outpute
 	result = [
 		e['title'],
 		e['type'] +" Instructor: "+ e['instructor'] +" | Credits: "+str( e['credits'] ) ,
@@ -112,12 +124,14 @@ def parse_course_info(e):
 	]
 	result0 = ""
 	for key,value in e.items():
-		result0 += key + "=>" + str(value) + " "
+		result0 += key + "=>" + str(value) + " | "
 	# return "\n".join(result)
-	return "\n".join(result)
+	return "\n".join(result) + (result0) if Debug else ""
 
 
 def parse_results(text):
+	# converts the HTTP request data from Minerva into a logical format in a python dictionary
+
 	stream = StringIO.StringIO(text.encode("ascii","ignore"))
 	field_names = ['crn','subject','course','section','type','credits','title','days','time','cap','wl_cap','wl_act','wl_rem','instructor','date','location','status']
 	file = csv.DictReader(stream,field_names)
