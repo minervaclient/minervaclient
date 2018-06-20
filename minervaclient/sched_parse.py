@@ -45,7 +45,7 @@ def parse_schedule(text,separate_wait = True):
 		entry['_status_desc'],entry['_status_date'] = entry['status'].split(" on ")
 		entry['_status_desc'] = get_status_code(entry['_status_desc'],short=True)
 		
-		entry['_status_date'] = dt.strptime(entry['_status_date'],'%b %d, %Y').strftime(config.date_fmt['short_date'])
+		# entry['_status_date'] = dt.strptime(entry['_status_date'],'%b %d, %Y').strftime(config.date_fmt['short_date'])
 
 		if 'wait_notify_expires' in entry and entry['wait_notify_expires'] is not None and entry['wait_notify_expires'] != '{0}':
 			entry['wait_notify_expires'] = dt.strptime(entry['wait_notify_expires'],minerva_date['full']).strftime(config.date_fmt['short_datetime'])

@@ -3,11 +3,12 @@
 # This file is from Minervac, a command-line client for Minerva
 # <http://npaun.ca/projects/minervac>
 # (C) Copyright 2016-2017 Nicholas Paun
+# (C) Copyright 2018-2019 Ryan B Au
 
 
-import reg,sched,exams,transcript
-from minerva_common import *
-import config,credentials_local
+from minervaclient import reg,sched,exams,transcript
+from minervaclient.minerva_common import *
+from minervaclient import config,credentials_local
 
 
 import argparse,sys,json

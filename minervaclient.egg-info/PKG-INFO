@@ -1,0 +1,11 @@
+Metadata-Version: 1.0
+Name: minervaclient
+Version: 1.0.0
+Summary: Tools and Utilities that can be used to access McGill University's Minerva service
+Home-page: https://github.com/nicholaspaun/minervaclient
+Author: Ryan B Au
+Author-email: auryan898@gmail.com
+License: MIT
+Description: UNKNOWN
+Keywords: minerva,banner,mcgill,college,schedule
+Platform: UNKNOWN
