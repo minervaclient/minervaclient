@@ -126,7 +126,7 @@ def beautify_course_info(e, Debug=False):
 	for key,value in e.items():
 		result0 += key + "=>" + str(value) + " | "
 	# return "\n".join(result)
-	return "\n".join(result) + (result0) if Debug else ""
+	return "\n".join(result) + ((result0) if Debug else "")
 
 
 def parse_results(text):

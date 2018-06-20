@@ -229,7 +229,7 @@ def exec_search(args):
 	codes_given = course_ref_type(args.course[0])
 	term = get_term_code(args.term)
 	courses = args.course
-	
+
 	# print courses
 	print ""
 	cType = ""
@@ -238,7 +238,7 @@ def exec_search(args):
 	elif(args.tutorial_only):
 		cType = "Tutorial"
 	
-	pub_search.print_search(term, courses, cType, args.availability_only, verbose=args.verbose, Debug=args.debug)
+	pub_search.print_search(term, courses, cType, avail=args.availability_only, verbose=args.verbose, Debug=args.debug)
 	
 main()
 
