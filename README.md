@@ -1,4 +1,4 @@
-# Minervac
+# Minervaclient
 ### The Minerva Client
 
 `minervac` is a CLI client for Minerva's course registration facilities. The program can be run either **without** a Minerva login to: 
