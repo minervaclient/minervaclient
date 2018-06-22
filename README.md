@@ -33,7 +33,7 @@ Features to be added in the future include:
 - (CLI) An interactive shell feature, so that commands can be run one after the other without repeated Minerva logons.
 - (CLI) Temporary remembering of Minerva credentials to prevent the need for repeated logons for every command call.
 
-### Patch 1.0.1 - June 22, 2018
+### Patch 1.1.0 - June 22, 2018
 #### New Feature:
 - Updated the installation methods, now any form of installation has the same functionality
 - Implement an on-screen login when running features that require Minerva login
