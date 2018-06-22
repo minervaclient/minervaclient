@@ -29,9 +29,15 @@ The program is implemented in Python and currently is very hacky. Pull requests 
 
 ### Unreleased
 Features to be added in the future include:
-- (CLI) An interface to store Minerva credentials in a local cache
-- (CLI) Secure storing of Minerva credentials for personal registering features
 - (Library) Documentation to make this a proper API for more reusability and other spin-off projects like a full website, maybe Android/iOS apps.
+- (CLI) An interactive shell feature, so that commands can be run one after the other without repeated Minerva logons.
+- (CLI) Temporary remembering of Minerva credentials to prevent the need for repeated logons for every command call.
+
+### Patch 1.0.1 - June 22, 2018
+#### New Feature:
+- Updated the installation methods, now any form of installation has the same functionality
+- Implement an on-screen login when running features that require Minerva login
+
 
 ### Version 1.0.0 - June 20, 2018
 #### New Features:
@@ -61,15 +67,14 @@ The goals of this project are to create a simple and high-quality interface for 
 1. Download the source code.
 2. `minervac` uses the `requests`, `beautifulsoup4`, and `html5lib` modules for Python.
 	* A good way to install them is probably with `pip`: `sudo pip install requests beautifulsoup4 html5lib`
-3. Copy `credentials.py` to `credentials_local.py` and fill in your credentials.
-4. Edit `config.py` to setup various settings
-5. Run `python setup.py install` or `sudo python setup.py install`
-6. You may now run `minervac -h` for help information.  This just works for Unix/Linux but it's iffy for Windows.  You might need some bash command prompt for it to work on Windows ex. Git Bash, Cygwin
+3. Edit `config.py` to setup various settings
+4. Run `python setup.py install` or `sudo python setup.py install`
+5. You may now run `minervac -h` for help information.  This just works for Unix/Linux but it's iffy for Windows.  You might need some bash command prompt for it to work on Windows ex. Git Bash, Cygwin
 
 ## Install via pip
 1. Run `pip install minervaclient` or `sudo pip install minervaclient`
 2. Use `minervac -h` to get help information.  
-NOTE: At the time of this writing, only `minervac search` will function properly.  Any other features require Minerva Login information to be included in the installation of this package, which can't be changed at this point.
+NOTE: At the time of this writing, all features of the application should work, now that login occurs everytime the application is run
 
 ## Usage
 
