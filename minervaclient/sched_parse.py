@@ -35,8 +35,8 @@ def parse_schedule(text,separate_wait = True):
             if entry[field] == '':
                 entry[field] = '{0}'
 
-                entry['instructor'] = entry['instructor'].replace(', ','')            
-                entry['_instructor_sn'] = entry['instructor'].split('; ')[0].split(' ')[-1]
+        entry['instructor'] = entry['instructor'].replace(', ','')            
+        entry['_instructor_sn'] = entry['instructor'].split('; ')[0].split(' ')[-1]
 
         if entry['credits'][-4:] == '.000': #Strip decimals when irrelevant
             entry['credits'] = entry['credits'][:-4]

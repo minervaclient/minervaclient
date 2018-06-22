@@ -3,11 +3,14 @@
 # <http://npaun.ca/projects/minervac>
 # (C) Copyright 2016-2017 Nicholas Paun
 
-import config,credentials_local
+import config
 import requests,sys
 import datetime
+import getpass
 from datetime import datetime as dt
 
+SID=""
+PIN=""
 cookie_data = {}
 referer = ""
 s = requests.Session()
@@ -38,13 +41,37 @@ def minerva_post(func,req):
     referer = url
     return r
 
-def minerva_login():
-    """Login for the user, utilizing the credentials from credentials_local.py.
-    
-    TODO: change this function to implement a better practice of storing credentials that doesn't involve altering source code
+def initial_login(sid="", pin="", inConsole=False):
+    """ Set the global values for the Student ID number and Personal Information Number (password).
+    Throws error if these values are still not given """
+    global SID
+    global PIN
+    SID = sid
+    PIN = pin
+    if(SID=="" or PIN==""):
+        if(inConsole):
+            SID = input("Enter your Minerva ID number: ")
+            PIN = getpass.getpass("Enter your PIN number: ")
+        else:
+            raise ValueError('SID and PIN values must be given at some point.  Run "minerva_common.initial_login(sid,pin)"')
+
+def minerva_login(sid="", pin=""):
+    """Login for the user, utilizing the credentials from the arguments, sid and pin or from the global variables SID and PIN.
+   Throws error if these values are empty strings
     """
+    global SID
+    global PIN
+    if(sid=="" or pin==""):
+        if(SID=="" or PIN==""):
+            raise ValueError('SID and PIN values must be given at some point.  Run "minerva_common.initial_login(sid,pin)"')
+        sid=SID
+        pin=PIN
+    else:
+        SID=sid 
+        PIN=pin
+
     minerva_get("twbkwbis.P_WWWLogin")
-    minerva_post("twbkwbis.P_ValLogin",{'sid': credentials_local.id, 'PIN': credentials_local.pin})
+    minerva_post("twbkwbis.P_ValLogin",{'sid': sid, 'PIN': pin})
     minerva_get("twbkwbis.P_GenMenu?name=bmenu.P_MainMnu")
 
 def minerva_reg_menu():

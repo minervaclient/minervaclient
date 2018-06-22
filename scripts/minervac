@@ -8,9 +8,10 @@
 
 from minervaclient import reg,sched,exams,transcript,pub_search
 from minervaclient.minerva_common import *
+from minervaclient import minerva_common
 from minervaclient import config,credentials_local
 
-
+import getpass
 import argparse,sys,json
 state = {}
 
@@ -82,15 +83,20 @@ def main():
 
 	args = ap.parse_args()
 
+	
+	
 
 	if args.verbose:
 		set_loglevel(True)
 
 	if args.which == 'reg':
+		initial_login(inConsole=True)
 		exec_reg(args)
 	elif args.which == 'sched':
+		initial_login(inConsole=True)
 		exec_sched(args)
 	elif args.which == 'transcript':
+		initial_login(inConsole=True)
 		exec_transcript(args)
 	elif args.which == 'search':
 		exec_search(args)
@@ -101,6 +107,11 @@ def course_ref_type(arg):
 def get_state_filename():
         import os
         return os.path.dirname(os.path.abspath(sys.argv[0])) + "/state.dat"
+
+# def initial_login():
+# 	minerva_common.SID = input("Enter your Minerva ID number: ")
+# 	minerva_common.PIN = getpass.getpass("Enter your PIN number: ")
+	# minerva_login(sid,pin)
 
 def save_state(job,data):
         global state
