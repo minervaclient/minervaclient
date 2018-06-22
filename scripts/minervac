@@ -239,7 +239,7 @@ def exec_search(args):
 		cType = "Tutorial"
 	
 	pub_search.print_search(term, courses, cType, avail=args.availability_only, verbose=args.verbose, Debug=args.debug)
-	
-main()
+if __name__ == '__main__':
+	main()
 
 
