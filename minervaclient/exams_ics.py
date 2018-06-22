@@ -18,7 +18,7 @@ def find_exam_times(start):
 def gen_ics_event(entry,datetime,fmt,tag):
     dt_start,dt_end = find_exam_times(datetime)
     location = entry['_building'] + ' ' + entry['room']
-	
+    
     summary = sched_ics.ics_escape(sched_parse.apply_format(entry,fmt[0]))
     description = sched_ics.ics_escape(sched_parse.apply_format(entry,fmt[1]))
     uid = entry['_code'] + '-' + tag + "@minervac.icebergsys.net"
@@ -40,21 +40,21 @@ END:VEVENT""".format(uid=uid,summary=summary,description=description,location=lo
 
 
 def export_ics_sched(sched,report = 'cal_exams'):
-	fmt = sched_ics.prepare_cal_report(report)
+    fmt = sched_ics.prepare_cal_report(report)
 
-	cal = u"""BEGIN:VCALENDAR
+    cal = u"""BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//Minervaclient//NONSGML minervac.icebergsys.net//EN"""
 
-	for entry in sched:
+    for entry in sched:
                 cal += gen_ics_event(entry,entry['_datetime'][0],fmt,'final')
                 if 'date_2' in entry:
                     cal += gen_ics_event(entry,entry['_datetime'][1],fmt,'final-day-2')
 
-	cal += u"""
+    cal += u"""
 END:VCALENDAR"""
 
-	return cal
+    return cal
 
 def export_schedule(term,report = 'cal_exams'):
     exams = exams_parse.find_exams(term,return_notfound=False)

@@ -81,29 +81,29 @@ def search_exams(sched,(sn,courses)):
     for course in courses:
         if course not in sched:
             notfound.append({'_code': course, '_reason': 'No final exam found for this course.'})
-       	    continue
+            continue
 
-	entry = sched[course]
-	found = False
+    entry = sched[course]
+    found = False
 
-	for loc in entry['loc']:
- 		cmp_f = loc['from']
-		sn_f = sn.ljust(len(cmp_f),'A')
-	
-		if sn_f >= cmp_f:
-			cmp_t = loc['to']
-			sn_t = sn.ljust(len(cmp_t),'A')
-			if sn_t <= cmp_t:
-				entry.update(loc) # Flatten for easy report formatting
-				found = True
-				break
+    for loc in entry['loc']:
+        cmp_f = loc['from']
+        sn_f = sn.ljust(len(cmp_f),'A')
+    
+        if sn_f >= cmp_f:
+            cmp_t = loc['to']
+            sn_t = sn.ljust(len(cmp_t),'A')
+            if sn_t <= cmp_t:
+                entry.update(loc) # Flatten for easy report formatting
+                found = True
+                break
 
-	if found:
-		entries.append(rewrite_record(entry))
-	else:
-		notfound.append({'_code': course, '_reason': "No exam location found for your surname. You're totally sure you're in the course right?"})
+    if found:
+        entries.append(rewrite_record(entry))
+    else:
+        notfound.append({'_code': course, '_reason': "No exam location found for your surname. You're totally sure you're in the course right?"})
 
-	
+    
     return (entries,notfound)
 
 def find_exams(term,return_notfound = True):

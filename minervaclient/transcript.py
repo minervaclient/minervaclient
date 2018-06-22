@@ -8,6 +8,7 @@ from minerva_common import *
 import transcript_parse
 
 def get_transcript(terms = None,report = 'transcript_default',show = ['summary','credit','grades']):
+    """Gets the student's transcript, optionally showing summary, credits, or grades"""
     minerva_login()
     minerva_records_menu()
     r = minerva_get("bzsktran.P_Display_Form?user_type=S&tran_type=V")
