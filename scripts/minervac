@@ -18,7 +18,7 @@ state = {}
 def parse_reg(subp):
 	parser = subp.add_parser('reg',help='Register for a set of courses')
 	parser.add_argument("-t","--term",help="The term (e.g. FALL2016, 201609, etc.) in which to register for these courses",required=True)
-        parser.add_argument("-j","--job",help="A unique name. When this argument is given, only registration will only be attempted for remaining courses in the job.\n\nNOTE: It is recommended that you use the -R option with this feature (https://github.com/nicholaspaun/minervaclient/wiki/Registrable-courses-and-jobs). ")
+	parser.add_argument("-j","--job",help="A unique name. When this argument is given, only registration will only be attempted for remaining courses in the job.\n\nNOTE: It is recommended that you use the -R option with this feature (https://github.com/nicholaspaun/minervaclient/wiki/Registrable-courses-and-jobs). ")
 	parser.add_argument("-A","--require-all",help="Only register for courses if all of the requested courses are available. NOTE: Only allowed when course codes are given.",action="store_true")
 	parser.add_argument("-R","--require-reg",help="Only register for courses if you can enter the class or the waitlist. NOTE: Only allowed when course codes are given..",action="store_true")
 	parser.add_argument("-n","--no-register",help="Don't actually perform registration.",action="store_true")
@@ -37,7 +37,7 @@ def parse_sched(subp):
 	parser.add_argument("-s","--short",help="Show a brief report of the schedule",action="store_true")
 	parser.add_argument("-V","--visual",help="Export a visual course timetable",action="store_true")
 	parser.add_argument("-C","--calendar",help="Export a calendar for the course schedule (or exam schedule if -E is also given)",action="store_true")
-        parser.add_argument("-E","--exams",help="Show the final exam schedule for your courses.",action="store_true")
+	parser.add_argument("-E","--exams",help="Show the final exam schedule for your courses.",action="store_true")
 	parser.add_argument("--conflicts-only",help="Only show course conflicts",action="store_true")
 	parser.add_argument("--no-conflicts",help="Don't show course conflicts",action="store_true")
 	parser.add_argument("-f","--format",help="[TODO] Choose text format for the displayed report")
@@ -54,7 +54,7 @@ def parse_transcript(subp):
 	parser.add_argument("-G","--grades",help="Include grades in the report",action="store_true")
 	parser.add_argument("-C","--credit",help="Include credit/GPA information in the report",action="store_true")
 	parser.add_argument("-S","--summary",help="Include a summary (program, status, etc). in the report",action="store_true")
-        parser.add_argument("-P","--header",help="Show the transcript header, which includes personal information and previous education, etc.",action="store_true")
+	parser.add_argument("-P","--header",help="Show the transcript header, which includes personal information and previous education, etc.",action="store_true")
 	parser.add_argument("-f","--format",help="[TODO] Choose text format for the displayed report")
 	parser.add_argument("-v", "--verbose", help="Show details about the HTTP requests sent to Minerva",action="store_true")
 	parser.set_defaults(which='transcript')
@@ -105,8 +105,8 @@ def course_ref_type(arg):
 	return arg[0].isalpha()
 
 def get_state_filename():
-        import os
-        return os.path.dirname(os.path.abspath(sys.argv[0])) + "/state.dat"
+	import os
+	return os.path.dirname(os.path.abspath(sys.argv[0])) + "/state.dat"
 
 # def initial_login():
 # 	minerva_common.SID = input("Enter your Minerva ID number: ")
@@ -114,7 +114,7 @@ def get_state_filename():
 	# minerva_login(sid,pin)
 
 def save_state(job,data):
-        global state
+	global state
 	f = open(get_state_filename(),"w")
 	state[job].extend(data)
 	f.write(json.dumps(state))
@@ -125,7 +125,7 @@ def restore_state(job,courses):
 	state = json.loads(open(get_state_filename()).read())
 	if job in state:
 		courses = list(set(courses) - set(state[job]))
-                print ">>>",courses,"<<<"
+		print ">>>",courses,"<<<"
 	else:
 		state[job] = []
 
@@ -181,9 +181,9 @@ def exec_sched(args):
 	elif args.visual:
 		report = 'timetable_default'
 	elif args.calendar:
-                if args.exams:
-                    report = 'cal_exams'
-                else:
+		if args.exams:
+			report = 'cal_exams'
+		else:
 		    report = 'cal_default'
 	elif args.conflicts_only:
 		report = 'conflicts'
@@ -197,7 +197,7 @@ def exec_sched(args):
 		report = 'default'
 
         if not args.exams:
-	    sched.course_details(term,report,visual=args.visual,calendar=args.calendar,conflicts_only=args.conflicts_only,no_conflicts=args.no_conflicts)
+	    	sched.course_details(term,report,visual=args.visual,calendar=args.calendar,conflicts_only=args.conflicts_only,no_conflicts=args.no_conflicts)
         else:
             exams.final_exams(term,report,calendar=args.calendar)
 
@@ -231,8 +231,8 @@ def exec_transcript(args):
 		show.append('credit')
 	if args.grades:
 		show.append('grades')
-        if args.header:
-                show.append('header')
+	if args.header:
+		show.append('header')
 
 	transcript.get_transcript(terms,report,show)
 
