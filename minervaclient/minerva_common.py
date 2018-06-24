@@ -41,6 +41,16 @@ def minerva_post(func,req):
     referer = url
     return r
 
+def verify_login():
+    bad_sid = not str(SID).isdigit() or len(str(SID)) != 9
+    bad_pin = len(PIN) != 6
+    if bad_sid and bad_pin:
+        raise ValueError('SID must be a 9 digit number ID and PIN must be 6 characters long')
+    if bad_sid:
+        raise ValueError('SID must be a 9 digit number ID')
+    if bad_pin:    
+        raise ValueError('PIN must be 6 characters long')
+
 def initial_login(sid="", pin="", inConsole=False):
     """ Set the global values for the Student ID number and Personal Information Number (password).
     Throws error if these values are still not given """
@@ -48,12 +58,27 @@ def initial_login(sid="", pin="", inConsole=False):
     global PIN
     SID = sid
     PIN = pin
-    if(SID=="" or PIN==""):
+    if not has_login():
         if(inConsole):
             SID = input("Enter your Minerva ID number: ")
             PIN = getpass.getpass("Enter your PIN number: ")
         else:
             raise ValueError('SID and PIN values must be given at some point.  Run "minerva_common.initial_login(sid,pin)"')
+    verify_login()
+        
+def minerva_logout():
+    """Logout for the user by altering the credentials, the global variables SID and PIN.
+    
+    """
+    global SID
+    global PIN
+    SID = ""
+    PIN = ""
+
+def has_login():
+    global SID
+    global PIN
+    return not (SID=="" or PIN=="")
 
 def minerva_login(sid="", pin=""):
     """Login for the user, utilizing the credentials from the arguments, sid and pin or from the global variables SID and PIN.
@@ -62,14 +87,16 @@ def minerva_login(sid="", pin=""):
     global SID
     global PIN
     if(sid=="" or pin==""):
-        if(SID=="" or PIN==""):
+        if not has_login():
             raise ValueError('SID and PIN values must be given at some point.  Run "minerva_common.initial_login(sid,pin)"')
+            return
         sid=SID
         pin=PIN
     else:
         SID=sid 
         PIN=pin
-
+    verify_login()
+    
     minerva_get("twbkwbis.P_WWWLogin")
     minerva_post("twbkwbis.P_ValLogin",{'sid': sid, 'PIN': pin})
     minerva_get("twbkwbis.P_GenMenu?name=bmenu.P_MainMnu")
