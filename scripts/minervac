@@ -365,32 +365,45 @@ class MinervaShell(Cmd):
     wrapper = ShellWrapper()
     ap = wrapper.ap
     subp = wrapper.subp
+    subcommand_desc = {
+        "register (reg)":"Register for a set of courses",
+        "schedule (sched)":"Display your course schedule",
+        "transcript":"Display your transcript",
+        "search":"Search for a course",
+        "login":"Set login credentials for this session",
+        "logout":"Remove the login credentials for this session"
+    }
     
     def preloop(self):
         """Introduction message that is printed just before the interpreter is initialized"""
         print "\nWelcome to the Minerva Client interpreter!"
         
-        self.help_introduction(None)
+        # self.help_introduction()
+        self.do_help("")
+        
 
         self.prompt = "\nminervac$ "
-    def help_introduction(self,s):
-        """Help introcution message"""
+    def do_help(self,s):
+        """Help introduction message"""
+        if s is not "":
+            Cmd.do_help(self,s)
+            return
+        
         print "\nYour login information will be retained for the duration of this session"
         print "Possible shell commands include:\n"
-        subcommands = {
-            "register (reg)":"Register for a set of courses",
-            "schedule (sched)":"Display your course schedule",
-            "transcript":"Display your transcript",
-            "search":"Search for a course",
-            "login":"Set login credentials for this session",
-            "logout":"Remove the login credentials for this session"
-        }
-        for name, descript in subcommands.items():
-            print "\t%-15s" % (name) + descript
+        
+        for name, descript in self.subcommand_desc.items():
+            print "\t%-20s" % (name) + descript
+        print "\n\t%-20s" % ("exit") + "Exit the interpreter, and end this session"
+        print "\nHelp commands take the form of either:\n help reg || ? reg || reg -h || reg --help"
+        
     def do_search(self,s):
         i = CommandWrapper(self,s,"search",exec_search)
     def do_exit(self,s):
-        return True
+        if "-h" in s or "--help" in s:
+            self.help_exit()
+        else:
+            return True
     def do_schedule(self,s):
         i = CommandWrapper(self,s,"schedule",exec_sched, True)
     def do_sched(self,s):
@@ -402,26 +415,39 @@ class MinervaShell(Cmd):
     def do_reg(self,s):
         self.do_register(s)    
     def do_login(self,s):
-        i = CommandWrapper(self,s,"login",exec_login)
+        if ("-h" in s) or ("--help" in s) or ("help" in s):
+            print "usage(shell only): minervac$ login"
+            print "\nSet login credentials for this session"
+        else:
+            i = CommandWrapper(self,s,"login",exec_login)
     def do_logout(self,s):
         if ("-h" in s) or ("--help" in s) or ("help" in s):
-            print "usage: minervac logout"
+            print "usage(shell only): minervac logout"
             print "\nRemoves the Minerva credentials from this session"
         else:
             minerva_logout()
             print "Logout Successful"
+    
     def help_search(self):
-        i = CommandWrapper(self,"search -h","",exec_search)
+        self.do_search("-h")
     def help_schedule(self):
-        i = CommandWrapper(self,"schedule -h","",exec_sched, True)
+        self.do_schedule("-h")
+    def help_sched(self):
+        self.help_schedule()
     def help_transcript(self):
-        i = CommandWrapper(self,"transcript -h","",exec_transcript, True)
+        self.do_transcript("-h")
     def help_register(self):
-        i = CommandWrapper(self,"register -h","",exec_reg, True)
+        self.do_register("-h")
+    def help_reg(self):
+        self.help_register()
     def help_login(self):
-        i = CommandWrapper(self,"login -h","",exec_login)
+        self.do_login("-h")
     def help_logout(self):
-        self.do_logout("help")
+        self.do_logout("-h")
+    def help_exit(self):
+        print "usage(shell only): minervac$ exit"
+        print "\nExit the interpreter, and end this session"
+
     
 if __name__ == '__main__':
     main()
