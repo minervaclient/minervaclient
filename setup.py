@@ -22,7 +22,11 @@ setup(name='minervaclient',
     install_requires=[
         'requests', 'beautifulsoup4', 'html5lib'
     ],
+    # extras_require={
+    #
+    # },
     license='MIT',
     long_description=long_description,
     long_description_content_type='text/markdown'
      )
+print "the packages 'beautifulsoup4' and 'html5lib' are for webpage creation of schedules"
