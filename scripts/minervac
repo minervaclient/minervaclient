@@ -11,12 +11,13 @@ from minervaclient.minerva_common import *
 from minervaclient import minerva_common
 from minervaclient import config
 
+from cmd import Cmd
 import getpass
 import argparse,sys,json
 state = {}
 
-def parse_reg(subp):
-    parser = subp.add_parser('register',help='Register for a set of courses', add_help=False)
+def parse_register(subp):
+    parser = subp.add_parser('register', help='Register for a set of courses', aliases=['reg'], add_help=False  )
     parser.add_argument("-t","--term",help="The term (e.g. FALL2016, 201609, etc.) in which to register for these courses",required=True)
     parser.add_argument("-j","--job",help="A unique name. When this argument is given, only registration will only be attempted for remaining courses in the job.\n\nNOTE: It is recommended that you use the -R option with this feature (https://github.com/nicholaspaun/minervaclient/wiki/Registrable-courses-and-jobs). ")
     parser.add_argument("-A","--require-all",help="Only register for courses if all of the requested courses are available. NOTE: Only allowed when course codes are given.",action="store_true")
@@ -29,8 +30,8 @@ def parse_reg(subp):
     parser.add_argument('course',nargs='+',help="A series of CRNs (e.g. 814 202) or course codes (POLI-244-001 COMP-251-002), but not both.")
     parser.set_defaults(which='register')
 
-def parse_sched(subp):
-    parser = subp.add_parser('schedule',help='Display your course schedule', add_help=False)
+def parse_schedule(subp):
+    parser = subp.add_parser('schedule',help='Display your course schedule', aliases=['sched'], add_help=True)
     parser.add_argument("-t","--term",help="The term (e.g. FALL2016, 201609, etc.) for which to display the schedule",required=True)
     parser.add_argument("-D","--diff-set",help="[TODO] Monitor the requested report for any changes compared with the previous reports in the diff set")
     parser.add_argument("-r","--report",help="choose which schedule report to display (see config.py to configure")
@@ -43,7 +44,7 @@ def parse_sched(subp):
     parser.add_argument("--no-conflicts",help="Don't show course conflicts",action="store_true")
     parser.add_argument("-f","--format",help="[TODO] Choose text format for the displayed report")
     parser.add_argument("-v", "--verbose", help="Show details about the HTTP requests sent to Minerva",action="store_true")
-    parser.add_argument("-h", "--help", default=argparse.SUPPRESS, action='help', help="Displays the help message for this subcommand")
+    # parser.add_argument("-h", "--help", default=argparse.SUPPRESS, action='help', help="Displays the help message for this subcommand")
     parser.set_defaults(which='schedule')
 
 def parse_transcript(subp):
@@ -94,10 +95,11 @@ def parse_login(subp):
 
 def main():
     ap = argparse.ArgumentParser()
+    ap.register('action', 'parsers', AliasedSubParsersAction)
     subp = ap.add_subparsers(help = 'Minervaclient subcommands')
 
-    parse_reg(subp)
-    parse_sched(subp)
+    parse_register(subp)
+    parse_schedule(subp)
     parse_transcript(subp)
     parse_search(subp)
     parse_shell(subp)
@@ -130,11 +132,6 @@ def course_ref_type(arg):
 def get_state_filename():
     import os
     return os.path.dirname(os.path.abspath(sys.argv[0])) + "/state.dat"
-
-# def initial_login():
-# minerva_common.SID = input("Enter your Minerva ID number: ")
-# minerva_common.PIN = getpass.getpass("Enter your PIN number: ")
-    # minerva_login(sid,pin)
 
 def save_state(job,data):
     global state
@@ -269,7 +266,7 @@ def exec_search(args):
         cType = "Tutorial"
     
     pub_search.print_search(term, courses, cType, avail=args.availability_only, verbose=args.verbose, Debug=args.debug)
-import getpass
+
 def exec_login(args):
     sid = ""
     pin = ""
@@ -297,29 +294,65 @@ def exec_login(args):
 
     print "Login Successful"
 
-from cmd import Cmd
+def exec_shell(args):
+    interpreter = MinervaShell()
+    interpreter.cmdloop()
+
+class AliasedSubParsersAction(argparse._SubParsersAction):
+    # Thanks to @sampsyo for dedicating this code to the public domain
+    # that adds an aliasing feature to argparse subcommands for python 2
+    # https://gist.github.com/sampsyo/471779
+    class _AliasedPseudoAction(argparse.Action):
+        def __init__(self, name, aliases, help):
+            dest = name
+            if aliases:
+                dest += ' (%s)' % ','.join(aliases)
+            sup = super(AliasedSubParsersAction._AliasedPseudoAction, self)
+            sup.__init__(option_strings=[], dest=dest, help=help) 
+
+    def add_parser(self, name, **kwargs):
+        if 'aliases' in kwargs:
+            aliases = kwargs['aliases']
+            del kwargs['aliases']
+        else:
+            aliases = []
+
+        parser = super(AliasedSubParsersAction, self).add_parser(name, **kwargs)
+
+        # Make the aliases work.
+        for alias in aliases:
+            self._name_parser_map[alias] = parser
+        # Make the help text reflect them, first removing old help entry.
+        if 'help' in kwargs:
+            help = kwargs.pop('help')
+            self._choices_actions.pop()
+            pseudo_action = self._AliasedPseudoAction(name, aliases, help)
+            self._choices_actions.append(pseudo_action)
+
+        return parser
 
 class ShellWrapper():
     def __init__(self):
         self.ap = argparse.ArgumentParser()
+        self.ap.register('action', 'parsers', AliasedSubParsersAction)
         self.subp = self.ap.add_subparsers(help = 'Minervaclient subcommands')
 
-        parse_reg(self.subp)
-        parse_sched(self.subp)
+        parse_register(self.subp)
+        parse_schedule(self.subp)
         parse_transcript(self.subp)
         parse_search(self.subp)
-        parse_shell(self.subp)
         parse_login(self.subp)
 
 class CommandWrapper(Cmd):
     def __init__(self, cmd_parent, line_args, command_name, command_function, try_login = False):
         # super(CommandWrapper,self).__init__()
-        if not has_login() and try_login:
-            initial_login(inConsole=True)
+        
         try:
             args = cmd_parent.ap.parse_args((command_name+" "+line_args).split())
             if args.verbose:
                 set_loglevel(True)
+            if not has_login() and try_login and not hasattr(args,'help'):
+                initial_login(inConsole=True)
             command_function(args)
         except SystemExit:
             return
@@ -334,18 +367,19 @@ class MinervaShell(Cmd):
     subp = wrapper.subp
     
     def preloop(self):
+        """Introduction message that is printed just before the interpreter is initialized"""
         print "\nWelcome to the Minerva Client interpreter!"
         
         self.help_introduction(None)
 
         self.prompt = "\nminervac$ "
-    
     def help_introduction(self,s):
+        """Help introcution message"""
         print "\nYour login information will be retained for the duration of this session"
         print "Possible shell commands include:\n"
         subcommands = {
-            "register":"Register for a set of courses",
-            "schedule":"Display your course schedule",
+            "register (reg)":"Register for a set of courses",
+            "schedule (sched)":"Display your course schedule",
             "transcript":"Display your transcript",
             "search":"Search for a course",
             "login":"Set login credentials for this session",
@@ -359,10 +393,14 @@ class MinervaShell(Cmd):
         return True
     def do_schedule(self,s):
         i = CommandWrapper(self,s,"schedule",exec_sched, True)
+    def do_sched(self,s):
+        self.do_schedule(s)
     def do_transcript(self,s):
         i = CommandWrapper(self,s,"transcript",exec_transcript, True)
     def do_register(self,s):
         i = CommandWrapper(self,s,"register",exec_reg, True)
+    def do_reg(self,s):
+        self.do_register(s)    
     def do_login(self,s):
         i = CommandWrapper(self,s,"login",exec_login)
     def do_logout(self,s):
@@ -385,10 +423,25 @@ class MinervaShell(Cmd):
     def help_logout(self):
         self.do_logout("help")
     
-def exec_shell(args):
-    interpreter = MinervaShell()
-    interpreter.cmdloop()
-
-
 if __name__ == '__main__':
     main()
+
+"""
+Possible tests include:
+minervac sched -h
+minervac schedule -h
+minervac reg -h
+minervac register -h
+minervac transcript -h
+minervac search -h
+minervac shell
+
+Test in the command shell include the above commands (w/o minervac) and:
+login
+login -u 123456789
+login -p h23456
+login -u 123456789 -p h23456
+logout
+login -u 123456789 -p h23456
+
+"""
