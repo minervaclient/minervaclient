@@ -35,6 +35,7 @@ Features to be added in the future include:
 - (CLI/Library) Create commands to alter settings that config.py contains  
 - (CLI/Library) Integrate the scripts from extras/ into the main package, either as part of the library or as a Command Line Tool  
 - (CLI) Streamline interactive shell, and provide comprehensive help messages and documentation
+- (CLI) Allow username and password entry as arguments in native command line tool
 
 ### **Version 1.2.0 - June 25, 2018**
 
