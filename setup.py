@@ -9,7 +9,7 @@ with open(path.join(this_directory, 'README')) as f:
     long_description = f.read()
 
 setup(name='minervaclient',
-    version='1.1.0',
+    version='1.2.0',
     description='Tools and Utilities that can be used to access McGill University\'s Minerva service',
     author='Ryan B Au',
     author_email='auryan898@gmail.com',

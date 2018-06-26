@@ -33,10 +33,28 @@ from source.  See [note](https://github.com/auryan898/minervaclient#install-via-
 
 __version__ = '1.1.0'
 """ Patch 1.1.0 - June 22, 2018
-New Feature:
+New Fixes:
 - Now any form of installation has the same functionality
 - Implement an on-screen login when running features that require Minerva login
 
+"""
+
+__version__='1.2.0'
+""" Version 1.2.0 - June 25, 2018
+New Features:
+
+- An interactive shell feature, so that commands can be run one after the other without repeated Minerva logons.
+  - Login credentials are retained for the duration that the shell runs
+  - Separate commands for setting/changing login credentials, and for removing credentials/logging out
+- Added some helpful login related functions to the library
+- Added backwards compatibility for reg and sched (They still work)
+- Added more help messages to the interpreter
+
+Fixed Bugs:
+
+- Fixed some bugs involving installations via pip
+- Changed the subcommands reg and sched => register and schedule for human readability
+- Fixed login-help bug in the interpreter
 """
 
 __all__ = ['reg','sched','exams','transcript','minerva_common','config','pub_search']
