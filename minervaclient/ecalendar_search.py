@@ -17,6 +17,57 @@ def filter_for_ascii(text, placeholder="_"):
             result += placeholder
     return result
 
+import re
+def ecalendar_get_reqs(term_year, course_code, search_type=0):
+    """Extract the Requisite courses from a given course's Notes section on eCalendar.  
+    Output takes the form of a jagged list, where lists embedded indicated different types of requirement.
+
+    term_year can be any valid term for ecalendar_get()
+    course_code can be any valid course_code for ecalendar_get()
+    search_type is either 0 or 1, 0 for Prerequisites, and 1 for Corequisites
+    
+    Example:  COMP 202, COMP 206, and MATH 263 or (MATH 241 and MATH 233) =>  [COMP-202, COMP-206, [MATH-263, [MATH-241, MATH-233] ] ]
+    
+    TODO: Make this more advanced and able to handle more use cases other than those similar to the examples given
+    """
+    # \w++(?:[^_]\d)++
+    # \w++(?:[^_]\d)++|(?<=, )or|and
+    search_codes = ['prereq','coreq']
+
+    course_info = ecalendar_get(term_year,course_code)
+    notes = course_info['notes']
+    prereqs = [] # in the format [req and req and [this or [this and this] or this]]
+    prereq = ""
+    note = ""
+    def _replacement_func(match):
+        txt = match.group(0)
+        return txt[:4] + "-" + txt[5:]
+    for note in notes:
+        if search_codes[search_type] in note.lower():
+            note = re.sub(r'\w+(?:[^_]\d)+',_replacement_func,note)
+            prereq = note.split(":")[1].strip().split(" ")
+            break
+            
+    isAndMode = True # it's either AND(True) or OR(False)
+    prevMode = isAndMode
+    counter = 0
+    for word in prereq[::-1]:
+        counter += 1
+        isEnd = counter==len(prereq)
+        # change mode to OR
+        if 'or' == word.lower():
+            isAndMode = False
+        if 'and' == word.lower():
+            isAndMode = True
+        
+        if word.lower() != u"or" and word.lower() != u"and":
+            prereqs.insert(0,word.strip(" ,.()"))
+
+        if (not prevMode and isAndMode) or (isEnd and not isAndMode):
+            prereqs = [ prereqs ]
+        prevMode = isAndMode
+    return prereqs
+
 def ecalendar_get(term_year, course_code, debug=False):
     """Gets a dictionary of information about a course, for the given term year and course 
     term_year takes the format of yyyy-yyyy, for example, 2018-2019
@@ -42,7 +93,7 @@ def ecalendar_get(term_year, course_code, debug=False):
     faculty_offer_link_text = "https://www.mcgill.ca"+faculty_offer_link.attrs['href']
     overview_text = container.select("#main-column #content #content-inner .content .content p")[0].text.strip()
     return {'title': title, 'terms':catalog_terms, 'instructors':catalog_instructors, 'notes':catalog_notes, 'faculty_offer':faculty_offer.text, 'offer_link':faculty_offer_link.text.strip(), 
-'offer_link_text':faculty_offer_link_text, 'overview':overview_text}
+    'offer_link_text':faculty_offer_link_text, 'overview':overview_text}
 
 def convert_ecalendar_term(term):
     """McGill eCalendar uses a different term/year format, so 201809, 201901, and 201905 all become 2018-2019, unless it already is 2018-2019"""
@@ -90,7 +141,7 @@ def query_courses_by_subject(term, subject_code):
             subject_keys.append(key)
     return subject_keys
 
-def print_ecalendar(term_year, subject_code, page_parts = ['title','overview'], time_interval = 0.5):
+def print_ecalendar(term_year, subject_code, page_parts = ['title','overview'], time_interval = 0.5, print_limit=None):
     """Testing code. Prints out all of the courses of given subject code(s) that is found by the minerva course info search (minervacient.pub_search.search)
     term_year may take any form.
     subject_code may be a list of strings, or a single string, case-insensitive ie. COMP, Poli, math, mATh, or FiGs
@@ -103,6 +154,10 @@ def print_ecalendar(term_year, subject_code, page_parts = ['title','overview'], 
     counter = 0
     for code in subject_keys: 
         code = code.lower()
+        if print_limit is not None and counter > print_limit:
+            break
+        else:
+            counter+=1
         try:
             counter+=1
             ecalendar_list.append( ecalendar_get(convert_ecalendar_term(term_year), code) )
