@@ -33,12 +33,13 @@ Features to be added in the future include:
 - (Library) Documentation to make this a proper API for more reusability and other spin-off projects like a full website, maybe Android/iOS apps
 - (CLI/Library) Create commands to alter settings that config.py contains, implement `ConfigParser` module
 - (CLI/Library) Integrate the scripts from extras/ into the main package, either as part of the library or as a Command Line Tool  
-- (CLI) Allow username and password entry as arguments in native command line tool
 - (CLI) Streamline interactive shell, and provide comprehensive help messages and documentation
-- (CLI) Temporary remembering of Minerva credentials in native terminal/console. Implement `keyring` module for secure credentials storage
 - (CLI) Implement caching feature to store data/info on courses from eCalendar
-- (CLI) Integrate eCalendar features into command line tool
 
+- (CLI) Allow username and password entry as arguments in native command line tool
+- (CLI) Temporary remembering of Minerva credentials in native terminal/console. Implement `keyring` module for secure credentials storage
+- (CLI) Integrate eCalendar features into command line tool
+- (CLI) Enhance the requisite courses extraction feature of the eCalendar parser
 - (CLI/Library) VSB schedule integration features
 - (CLI/Library) Query Mercury Evaluation data
 - (CLI/Library) Connect to Docuum
@@ -48,7 +49,10 @@ Features to be added in the future include:
 #### New Features:
 
 - eCalendar scraping added to library
-
+  - Scrape Course eCalendar page for Overview, Title, Notes, Faculty, Instructors, Terms
+  - Requisite Courses Extraction (WIP)
+  - Tool to convert typical term code to an eCalendar school year code
+  - Includes tool to print the information of the all the available courses of a given subject
 
 
 ### **Version 1.2.0 - June 25, 2018**
