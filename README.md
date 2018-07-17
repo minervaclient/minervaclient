@@ -30,12 +30,22 @@ The program is implemented in Python and currently is very hacky. Pull requests 
 ### **Unreleased**
 Features to be added in the future include:
 
-- (Library) Documentation to make this a proper API for more reusability and other spin-off projects like a full website, maybe Android/iOS apps.
-- (CLI) Temporary remembering of Minerva credentials in native terminal/console to prevent the need for repeated logons for every command call.
-- (CLI/Library) Create commands to alter settings that config.py contains  
+- (Library) Documentation to make this a proper API for more reusability and other spin-off projects like a full website, maybe Android/iOS apps
+- (CLI/Library) Create commands to alter settings that config.py contains, implement `ConfigParser` module
 - (CLI/Library) Integrate the scripts from extras/ into the main package, either as part of the library or as a Command Line Tool  
-- (CLI) Streamline interactive shell, and provide comprehensive help messages and documentation
 - (CLI) Allow username and password entry as arguments in native command line tool
+- (CLI) Streamline interactive shell, and provide comprehensive help messages and documentation
+- (CLI) Temporary remembering of Minerva credentials in native terminal/console. Implement `keyring` module for secure credentials storage
+- (CLI) Implement caching feature to store data/info on courses from eCalendar
+- (CLI) Integrate eCalendar features into command line tool
+
+### **Version 1.3.0 - July 17, 2018**
+
+#### New Features:
+
+- eCalendar scraping added to library
+
+
 
 ### **Version 1.2.0 - June 25, 2018**
 
