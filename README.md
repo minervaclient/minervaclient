@@ -39,6 +39,10 @@ Features to be added in the future include:
 - (CLI) Implement caching feature to store data/info on courses from eCalendar
 - (CLI) Integrate eCalendar features into command line tool
 
+- (CLI/Library) VSB schedule integration features
+- (CLI/Library) Query Mercury Evaluation data
+- (CLI/Library) Connect to Docuum
+
 ### **Version 1.3.0 - July 17, 2018**
 
 #### New Features:
