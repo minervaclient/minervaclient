@@ -17,7 +17,7 @@ setup(name='minervaclient',
     download_url='https://github.com/auryan898/minervaclient/archive/master.zip',
     keywords=['minerva','banner','mcgill','college','schedule'],
     packages=['minervaclient'],
-    scripts=['scripts/minervac'],
+    scripts=['scripts/minervac','scripts/minervac.bat'],
     classifiers=[],
     install_requires=[
         'requests', 'beautifulsoup4', 'html5lib'

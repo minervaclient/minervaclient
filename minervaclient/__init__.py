@@ -1,3 +1,5 @@
+from . import *
+
 __version__ = '0.0.0'
 """ September 1, 2017 (nicholaspaun)
 Notes:
@@ -57,4 +59,5 @@ Fixed Bugs:
 - Fixed login-help bug in the interpreter
 """
 
-__all__ = ['reg','sched','exams','transcript','minerva_common','config','pub_search']
+__all__ = ['reg','sched','exams','transcript','minerva_common','config','pub_search', 'mercury_search', 'ecalendar_search']
+
