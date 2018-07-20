@@ -93,6 +93,13 @@ def parse_login(subp):
     parser.add_argument("-h", "--help", default=argparse.SUPPRESS, action='help', help="Displays the help message for this subcommand")
     parser.set_defaults(which='login')
 
+def parse_logout(subp):
+    parser = subp.add_parser('logout',help='Delete the login credentials, ie. logout', add_help=False)
+    parser.add_argument("-v", "--verbose", help="Show more details",action="store_true")
+    parser.add_argument("-q","--quiet",help="Repress messages",action="store_true")
+    parser.add_argument("-h", "--help", default=argparse.SUPPRESS, action='help', help="Displays the help message for this subcommand")
+    parser.set_defaults(which='logout')
+
 def main():
     ap = argparse.ArgumentParser()
     ap.register('action', 'parsers', AliasedSubParsersAction)
@@ -103,13 +110,20 @@ def main():
     parse_transcript(subp)
     parse_search(subp)
     parse_shell(subp)
+    parse_login(subp)
+    parse_logout(subp)
 
     args = ap.parse_args()
 
     if args.verbose:
         set_loglevel(True)
-
-    if args.which == 'register':
+    
+    if args.which == 'login':
+        exec_login(args)
+    elif args.which == 'logout':
+        if not hasattr(args,'help'):
+            minerva_logout(inConsole=True)
+    elif args.which == 'register':
         if not hasattr(args,'help'):
             initial_login(inConsole=True)
         exec_reg(args)
@@ -273,21 +287,17 @@ def exec_login(args):
     can_repeat = True
     if args.username is not None:
         sid = args.username
-    if args.password is not None :
+    if args.password is not None:
         pin = args.password
-    if (not (args.quiet or args.re_login)) and has_login():
+    if (not (args.quiet or args.re_login)) and( has_login() or keyring_has_login()):
         try:
             if input("Do you want to re-enter your login information? (y/n) default:[y]") == 'n':
                 return
         except SyntaxError:
             pass
 
-    if sid=="" and args.username is None:
-        sid = input("Enter your Minerva ID number: ")
-    if pin=="" and args.password is None:
-        pin = getpass.getpass("Enter your PIN number: ")
     try:
-        initial_login(sid=sid, pin=pin)
+        initial_login(sid=sid, pin=pin, inConsole=True, reLogin=True)
     except ValueError, e:
         print e
         print "\nProper values must be given for login"
@@ -425,7 +435,7 @@ class MinervaShell(Cmd):
             print "usage(shell only): minervac logout"
             print "\nRemoves the Minerva credentials from this session"
         else:
-            minerva_logout()
+            minerva_logout(inConsole=True)
             print "Logout Successful"
     
     def help_search(self):
