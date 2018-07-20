@@ -53,7 +53,7 @@ def build_request(term,codes):
     ]
 
     for code in codes:
-        req.append(('sel_subj',code.split("-")[0]))
+        req.append(('sel_subj',code.split("-")[0].upper()))
     
     return urllib.urlencode(req)
 
@@ -87,22 +87,23 @@ def quick_search(term, course_codes, course_type=""):
     # find all of the full course codes that exist in the search query
     final_codes = []
     full_codes = []
-    for course_code in course_codes:
+    for course_code in course_codes: # course_code could be COMP-202 or something like COMP-200-001 or something like COMP-361D1-001
         counter = 1
         if(course_code in courses_obj):
-            full_codes.append(course_code)
+            full_codes.append(course_code) # if the course_code fits the format of COMP-200-001 or COMP-361D1-001 then just to list and move on
             continue
         else:
-            full_code = course_code[:8] + str(counter).join("-000".rsplit('0'*len(str(counter)),1))
+            # if the first code of COMP-202-001 is in the obj, then continue incrementing
+            full_code = course_code + str(counter).join("-000".rsplit('0'*len(str(counter)),1)) 
         
-        while (full_code in courses_obj) and (counter <= 999):
+        while (full_code.upper() in courses_obj) and (counter <= 999):
             full_codes.append(full_code)
             counter += 1 
-            full_code = course_code[:8] + str(counter).join("-000".rsplit('0'*len(str(counter)),1))
+            full_code = course_code + str(counter).join("-000".rsplit('0'*len(str(counter)),1))
 
     # only keep course codes of a specified type as defined by course_type, or leave it an empty string to get all
     for full_code in full_codes:
-        aType = courses_obj[full_code]['type']
+        aType = courses_obj[full_code.upper()]['type']
         if (course_type in aType):
             final_codes.append(full_code)
 
@@ -119,7 +120,7 @@ def print_search(term,course_codes, cType, avail=False, verbose=False, Debug=Fal
     full_codes.sort()
 
     for full_code in full_codes:
-        course = courses_obj[full_code]
+        course = courses_obj[full_code.upper()]
         if(avail and not (verbose or Debug)):
             print str(course['_code']),
             print " CRN: %-6s" % (str(course['crn'])),
