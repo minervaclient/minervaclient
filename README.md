@@ -35,14 +35,18 @@ Features to be added in the future include:
 - (CLI/Library) Integrate the scripts from extras/ into the main package, either as part of the library or as a Command Line Tool  
 - (CLI) Streamline interactive shell, and provide comprehensive help messages and documentation
 - (CLI) Implement caching feature to store data/info on courses from eCalendar
-
-- (CLI) Allow username and password entry as arguments in native command line tool
-- (CLI) Temporary remembering of Minerva credentials in native terminal/console. Implement `keyring` module for secure credentials storage
-- (CLI) Integrate eCalendar features into command line tool
+- (CLI) Submit Mercury Evaluation Survey (seems risky/tricky?)
 - (CLI) Enhance the requisite courses extraction feature of the eCalendar parser
-- (CLI/Library) VSB schedule integration features
-- (CLI/Library) Query Mercury Evaluation data
-- (CLI/Library) Connect to Docuum
+
+Features to be added in the NEAR future include:
+
+1. (CLI) Integrate eCalendar features into command line tool
+2. (CLI/Library) VSB schedule integration features
+3. (CLI/Library) Connect to Docuum
+4. (CLI/Library) Data Visualization tools for the Mercury Evaluations
+5. (CLI) Allow username and password entry as arguments in native command line tool
+6. (Library) Data analysis tools on the Mercury Evaluations
+7. (Library) Improve Mercury Instructor Search (suggestions? multiple results?)
 
 ### **Version 1.3.0 - July 17, 2018**
 
@@ -53,6 +57,12 @@ Features to be added in the future include:
   - Requisite Courses Extraction (WIP)
   - Tool to convert typical term code to an eCalendar school year code
   - Includes tool to print the information of the all the available courses of a given subject
+- Remembering of Minerva credentials in native terminal/console. Implemented `keyring` module for secure credentials storage in system keyring.
+- Minerva search function now accepts course codes case insensitive (always converts to uppercase)
+- Mercury Evaluation scraping tools added to library
+  - Search for Instructors based on either a given name or ID number, can be partial, and obtain full name and ID number
+  - Obtain the list of evaluation reports on a specific instructor, or on a specific course
+  - Obtain the information from an evaluation report given a report ID number (ID is found in reports listings, and is temporary)
 
 
 ### **Version 1.2.0 - June 25, 2018**
