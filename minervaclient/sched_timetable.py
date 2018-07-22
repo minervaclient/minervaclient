@@ -3,7 +3,7 @@
 # <http://npaun.ca/projects/minervac>
 # (C) Copyright 2016-2017 Nicholas Paun
 
-import config,sched_parse
+import config,sched_parse,pkgutil
 from datetime import datetime as dt
 from minerva_common import *
 
@@ -97,10 +97,11 @@ def colspan(col,set = None):
     else:
         colspan.spans[col] = set
 
-        
+
 def make_style_header():
     header = "<style>\n"
-    header += open('sched_timetable.css').read()
+    # header += open('sched_timetable.css').read()
+    header += pkgutil.get_data( __name__ , 'sched_timetable.css') # The proper method to grab file data
     header +=  "</style>\n"
 
     return header

@@ -27,6 +27,7 @@ setup(name='minervaclient',
     # },
     license='MIT',
     long_description=long_description,
-    long_description_content_type='text/markdown'
-     )
+    long_description_content_type='text/markdown',
+    include_package_data = True
+    )
 print "the packages 'beautifulsoup4' and 'html5lib' are for webpage creation of schedules"

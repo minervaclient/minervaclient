@@ -228,11 +228,11 @@ def exec_sched(args):
         report = 'short'
     else:
         report = 'default'
-
-        if not args.exams:
-            sched.course_details(term,report,visual=args.visual,calendar=args.calendar,conflicts_only=args.conflicts_only,no_conflicts=args.no_conflicts)
-        else:
-            exams.final_exams(term,report,calendar=args.calendar)
+    
+    if not args.exams:
+        sched.course_details(term,report,visual=args.visual,calendar=args.calendar,conflicts_only=args.conflicts_only,no_conflicts=args.no_conflicts)
+    else:
+        exams.final_exams(term,report,calendar=args.calendar)
 
 def exec_transcript(args):
     if args.term is None:
