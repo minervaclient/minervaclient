@@ -63,7 +63,10 @@ Features to be added in the NEAR future include:
   - Search for Instructors based on either a given name or ID number, can be partial, and obtain full name and ID number
   - Obtain the list of evaluation reports on a specific instructor, or on a specific course
   - Obtain the information from an evaluation report given a report ID number (ID is found in reports listings, and is temporary)
+- The original minervac script has been moved to the `__main__` module for cross-platform compatibility
 
+#### Bug Fixes:
+- Fix visual schedule creation missing file error
 
 ### **Version 1.2.0 - June 25, 2018**
 
