@@ -10,6 +10,16 @@ import re
 import config
 import sched_parse
 
+html_parser = 'html5lib'
+try:
+    import html5lib
+except ImportError:
+    try:
+        import lxml
+        html_parser  = 'lxml'
+    except ImportError:
+        html_parser = 'html.parser'
+
 def parse_record(cells):
     fields = ['status','course','section','title','credits','unknown','grade','remarks','unknown2','credits_earned','class_avg']
     record = {}
@@ -123,65 +133,71 @@ def parse_student_block(table):
     return info
 
 def parse_transcript(text):
-        text = text.replace("&nbsp;"," ").replace("<BR>","\n")
+    text = text.replace("&nbsp;"," ").replace("<BR>","\n")
 
-	html = BeautifulSoup(text,'html5lib')
-        transcript = {}
-	term = None
-        tables = html.body.find_all('table',{'class': 'dataentrytable'})
-        try:
-            tbl_transcript = tables[1]
-        except IndexError:
-            print("Transcript not available. Probably not registered.")
-            sys.exit(MinervaError.user_error)
-            
-        tbl_student = tables[0]
-        student_info = parse_student_block(tbl_student) # Just in case someone wants their name, or Permanent code, etc.
+    html = BeautifulSoup(text, html_parser)
+    if html_parser=='html.parser' or html_parser=='lxml':
+        print "Transcript feature may work improperly without html5lib." # special considerations for html.parser issues
 
-        trans_rows = tbl_transcript.tbody.find_all('tr',recursive=False)
-        for row in trans_rows:
-            cells = row.find_all('td',recursive=False)
-            if len(cells) == 1:
-                if cells[0].table:
-                    first_cell = cells[0].table.tr.td.text
-                    if first_cell.startswith(' '):
-                        transcript[term]['info'].update(parse_gpa_block(cells[0].table,transcript['000000']['info']))
-                    else:
-                        curr['grades'].extend(parse_transfer_credits(cells[0].table,curr['info']))
+    transcript = {}
+    term = None
+    tables = html.find_all('table',{'class': 'dataentrytable'})
+    # tables = html.select('table.dataentrytable ')
+    try:
+        tbl_transcript = tables[1]
+    except IndexError:
+        print("Transcript not available. Probably not registered.")
+        sys.exit(MinervaError.user_error)
+        
+    tbl_student = tables[0]
+    student_info = parse_student_block(tbl_student) # Just in case someone wants their name, or Permanent code, etc.
+
+    trans_rows = tbl_transcript.tbody.find_all('tr',recursive=False)
+    # trans_rows = tbl_transcript.select('tbody tr')
+    # print tbl_transcript.select('tbody tr') # temporary
+    for row in trans_rows:
+        cells = row.find_all('td',recursive=False)
+        if len(cells) == 1:
+            if cells[0].table:
+                first_cell = cells[0].table.tr.td.text
+                if first_cell.startswith(' '):
+                    transcript[term]['info'].update(parse_gpa_block(cells[0].table, transcript['000000']['info']))
                 else:
-                    if not cells[0].span:
-                        continue
-
-                    text = cells[0].span.text.strip()
-
-                    if cells[0].span.b:
-                        heading = cells[0].span
-                        term = get_term_code(heading.b.text.replace(" ",""))
-                        transcript[term] = {'grades': [],'info': {}}
-                        curr = transcript[term]
-                        curr['info']['term'] = heading.b.text.strip()
-
-                    elif text == '':
-                       continue
-                    elif text.startswith('Standing'): #This is your term standing
-                        nil,standing_text = text.split(":")
-                        curr['info']['standing'] = standing_text.strip()
-                    elif text.startswith('From:'): #This is advanced standing stuff
-                        curr['info'].update(parse_transfer(text))
-                    elif term == '000000':
-                        curr['info'].update(parse_init_block(text,heading))
-                    elif "\n" in text: #This is the degree block
-                        curr['info'].update(parse_info_block(text))
+                    curr['grades'].extend(parse_transfer_credits(cells[0].table,curr['info']))
             else:
-                if term:
-                    record = parse_record(cells)
-                    if record is not None:
-                        curr['grades'].append(parse_record(cells))
+                if not cells[0].span:
+                    continue
+
+                text = cells[0].span.text.strip()
+
+                if cells[0].span.b:
+                    heading = cells[0].span
+                    term = get_term_code(heading.b.text.replace(" ",""))
+                    transcript[term] = {'grades': [],'info': {}}
+                    curr = transcript[term]
+                    curr['info']['term'] = heading.b.text.strip()
+
+                elif text == '':
+                    continue
+                elif text.startswith('Standing'): #This is your term standing
+                    nil,standing_text = text.split(":")
+                    curr['info']['standing'] = standing_text.strip()
+                elif text.startswith('From:'): #This is advanced standing stuff
+                    curr['info'].update(parse_transfer(text))
+                elif term == '000000':
+                    curr['info'].update(parse_init_block(text,heading))
+                elif "\n" in text: #This is the degree block
+                    curr['info'].update(parse_info_block(text))
+        else:
+            if term:
+                record = parse_record(cells)
+                if record is not None:
+                    curr['grades'].append(parse_record(cells))
 
 
-        transcript['000000']['info'].update(student_info)
+    transcript['000000']['info'].update(student_info)
 
-        return transcript
+    return transcript
 
 def load_transcript_format(report):
         if report not in config.reports:

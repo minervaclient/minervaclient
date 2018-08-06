@@ -9,8 +9,14 @@ from minerva_common import *
 import config
 import sys,urllib,re
 
+html_parser = 'html5lib'
+try:
+    import html5lib
+except ImportError:
+    html_parser  = 'html.parser'
+
 def parse_schedule(text,separate_wait = True):
-    html = BeautifulSoup(text,'html5lib')
+    html = BeautifulSoup(text, html_parser)
     tbls_course = html.body.find_all('table',{'summary': 'This layout table is used to present the schedule course detail'})
     tbls_sched = html.body.find_all('table',{'summary': 'This table lists the scheduled meeting times and assigned instructors for this class..'})
 

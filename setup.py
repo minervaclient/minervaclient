@@ -20,10 +20,11 @@ setup(name='minervaclient',
     scripts=['scripts/minervac','scripts/minervac.bat'],
     classifiers=[],
     install_requires=[
-        'requests', 'beautifulsoup4', 'html5lib'
+        'requests', 'beautifulsoup4'
     ],
     extras_require={
-        'full_cli_support':['keyring']
+        'full_cli_support':['keyring'],
+        'html5_parse':['html5lib']
     },
     license='MIT',
     long_description=long_description,
