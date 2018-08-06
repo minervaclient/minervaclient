@@ -88,6 +88,7 @@ def quick_search(term, course_codes, course_type=""):
     final_codes = []
     full_codes = []
     for course_code in course_codes: # course_code could be COMP-202 or something like COMP-200-001 or something like COMP-361D1-001
+        course_code = course_code.upper()
         counter = 1
         if(course_code in courses_obj):
             full_codes.append(course_code) # if the course_code fits the format of COMP-200-001 or COMP-361D1-001 then just to list and move on
