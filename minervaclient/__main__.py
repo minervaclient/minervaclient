@@ -100,7 +100,7 @@ def parse_logout(subp):
     parser.add_argument("-h", "--help", default=argparse.SUPPRESS, action='help', help="Displays the help message for this subcommand")
     parser.set_defaults(which='logout')
 
-def main():
+def main(args_strings=[]):
     usage_msg = ("minervac [-h]\n                "
     "{register,reg,schedule,sched,transcript,search,shell,login,logout}")
     ap = argparse.ArgumentParser(usage=usage_msg)
@@ -115,8 +115,12 @@ def main():
     parse_login(subp)
     parse_logout(subp)
 
-    args = ap.parse_args()
-
+    args = None
+    if len(args_strings)>0:
+        args = ap.parse_args(args_strings)
+    else:
+        args = ap.parse_args()
+        
     if args.verbose:
         set_loglevel(True)
     
