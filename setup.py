@@ -22,9 +22,9 @@ setup(name='minervaclient',
     install_requires=[
         'requests', 'beautifulsoup4', 'html5lib'
     ],
-    # extras_require={
-    #
-    # },
+    extras_require={
+        'full_cli_support':['keyring']
+    },
     license='MIT',
     long_description=long_description,
     long_description_content_type='text/markdown',

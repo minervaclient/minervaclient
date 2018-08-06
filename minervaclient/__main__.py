@@ -291,7 +291,7 @@ def exec_login(args):
         sid = args.username
     if args.password is not None:
         pin = args.password
-    if (not (args.quiet or args.re_login)) and( has_login() or keyring_has_login()):
+    if (not (args.quiet or args.re_login)) and( has_login() or localsys_has_login()):
         try:
             if input("Do you want to re-enter your login information? (y/n) default:[y]") == 'n':
                 return

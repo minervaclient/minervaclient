@@ -51,25 +51,28 @@ def verify_login():
     if bad_pin:    
         raise ValueError('PIN must be 6 characters long')
 
-import keyring
-def keyring_logout():
-    """Deletes the values for SID and PIN from keyring, and returns boolean value, whether deletion was successful or not.
+try:
+    import keyring as local_credentials
+except ImportError:
+    from . import credentials as local_credentials
+def localsys_logout():
+    """Deletes the values for SID and PIN from the computer you are on, and returns boolean value, whether deletion was successful or not.
     Good for command line tools"""
     try:
-        keyring.delete_password('minervaclient_sid','minerva')
-        keyring.delete_password('minervalcient_pin','minerva')
+        local_credentials.delete_password('minervaclient_sid','minerva')
+        local_credentials.delete_password('minervalcient_pin','minerva')
         return True
-    except keyring.errors.PasswordDeleteError:
+    except local_credentials.errors.PasswordDeleteError:
         # print "Minerva user is already logged out"
         print "Minerva credentials do not exist"
         return False
 
-def keyring_get_login():
-    """Retrieves the login credentials from the keyring.
+def localsys_get_login():
+    """Retrieves the login credentials from the computer you are on.
     Good for command line tools"""
     try:
-        sid = keyring.get_password('minervaclient_sid','minerva')
-        pin = keyring.get_password('minervalcient_pin','minerva')
+        sid = local_credentials.get_password('minervaclient_sid','minerva')
+        pin = local_credentials.get_password('minervalcient_pin','minerva')
         if sid is None or pin is None:
             raise Exception("No credentials detected")
         return (sid, pin)
@@ -77,25 +80,26 @@ def keyring_get_login():
         print str(e)
         return ("","")
 
-def keyring_has_login():
-    """Checks the keyring for the presence of login credentials.
+def localsys_has_login():
+    """Checks the computer for the presence of login credentials.
     Good for command line tools"""
-    sid = keyring.get_password('minervaclient_sid','minerva')
-    pin = keyring.get_password('minervalcient_pin','minerva')
+    sid = local_credentials.get_password('minervaclient_sid','minerva')
+    pin = local_credentials.get_password('minervalcient_pin','minerva')
     return sid is not None and pin is not None
 
-def keyring_prompt_login(sid="",pin=""):
+def localsys_prompt_login(sid="",pin="",temporary=False):
     """Prompts user for login credentials that aren't already given via the parameters. 
     Good for command line tools"""
     if sid == "":
         sid = input("Enter your Minerva ID number: ")
     if pin == "":
         pin = getpass.getpass("Enter your PIN number: ")
-    keyring.set_password('minervaclient_sid','minerva',sid)
-    keyring.set_password('minervalcient_pin','minerva',pin)
+    if not temporary:
+        local_credentials.set_password('minervaclient_sid','minerva',sid)
+        local_credentials.set_password('minervalcient_pin','minerva',pin)
     return sid, pin
 
-def initial_login(sid="", pin="", inConsole=False, reLogin=False):
+def initial_login(sid="", pin="", inConsole=False, reLogin=False, temporary=False):
     """ Set the global values for the Student ID number and Personal Information Number (password) without sending http request to Minerva.
     Throws error if these values are still not given """
     global SID
@@ -103,14 +107,15 @@ def initial_login(sid="", pin="", inConsole=False, reLogin=False):
     # inConsole takes precedence
     if inConsole:
         # check keyring
-        if keyring_has_login() and not reLogin:
-            SID, PIN = keyring_get_login()
-        else:
-            SID, PIN = keyring_prompt_login(sid=sid,pin=pin)
+        if not temporary:
+            if localsys_has_login() and not reLogin:
+                SID, PIN = localsys_get_login()
+            else:
+                SID, PIN = localsys_prompt_login(sid=sid,pin=pin, temporary=temporary)
     # check param if not inConsole
-    else:
+    if not inConsole:
         if sid !="":
-            SID = sid # sid is isolated so that just this can be set    
+            SID = sid # sid is isolated so that just this can be set
         if pin !="":
             PIN = pin # pin is isolated so that just this can be set
 
@@ -129,7 +134,7 @@ def minerva_logout(inConsole=False):
     SID = ""
     PIN = ""
     if inConsole:
-        keyring_logout()
+        localsys_logout()
 
 def has_login():
     global SID

@@ -4,3 +4,14 @@
 id = 'McGill ID here'
 pin = 'Minerva PIN here'
 always_dry_run = False
+
+def get_password(*args):
+    return None
+def set_password(*args):
+    pass
+def delete_password(*args):
+    pass
+
+class errors():
+    class PasswordDeleteError(Exception):
+        pass
