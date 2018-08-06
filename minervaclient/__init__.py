@@ -25,7 +25,7 @@ an installable pip package that will be added to the PyPi system for easier inst
 - Added an explicit feature, `minervac search` in the command line app, for querying Minerva for 
 course information on CRNs, instructors, times, dates, waitlists, and general availability
 
-- tTe only command that works now is `minervac` which should replace the previous iteration's `mnvc` 
+- The only command that works now is `minervac` which should replace the previous iteration's `mnvc` 
 and `minervaclient`
 
 - Updated the installation methods, but the majority of features only work if installing via build 
@@ -57,6 +57,11 @@ Fixed Bugs:
 - Fixed some bugs involving installations via pip
 - Changed the subcommands reg and sched => register and schedule for human readability
 - Fixed login-help bug in the interpreter
+"""
+
+__version__='1.3.0'
+""" Version 1.3.0 - August 5th, 2018
+
 """
 
 __all__ = ['reg','sched','exams','transcript','minerva_common','config','pub_search', 'mercury_search', 'ecalendar_search']

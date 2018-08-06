@@ -58,6 +58,7 @@ Features to be added in the NEAR future include:
   - Tool to convert typical term code to an eCalendar school year code
   - Includes tool to print the information of the all the available courses of a given subject
 - Remembering of Minerva credentials in native terminal/console. Implemented `keyring` module for secure credentials storage in system keyring.
+  - Made usage of 'keyring' an extra that will be installable by pip via `pip install minervaclient[cli_features]`
 - Minerva search function now accepts course codes case insensitive (always converts to uppercase)
 - Mercury Evaluation scraping tools added to library
   - Search for Instructors based on either a given name or ID number, can be partial, and obtain full name and ID number
@@ -66,7 +67,7 @@ Features to be added in the NEAR future include:
 - The original minervac script has been moved to the `__main__` module for cross-platform compatibility
 
 #### Bug Fixes:
-- Fix visual schedule creation missing file error
+- Fixed visual schedule creation missing file error
 
 ### **Version 1.2.0 - June 25, 2018**
 
