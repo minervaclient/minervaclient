@@ -22,8 +22,11 @@ setup(name='minervaclient',
     install_requires=[
         'requests', 'beautifulsoup4'
     ],
+    dependency_links=[
+        'https://github.com/frispete/keyrings.cryptfile/archive/v1.2.1.zip',
+    ],
     extras_require={
-        'full_cli_support':['keyring'],
+        'full_cli_support':['keyring','keyrings.cryptfile'],
         'html5_parse':['html5lib']
     },
     license='MIT',

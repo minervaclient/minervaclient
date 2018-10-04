@@ -7,6 +7,7 @@ import urllib,sys,auth_search_parse
 from minerva_common import *
 
 def make_course_request(term,subjects):
+    """Perform a request to the minerva site, no context included."""
     request = [
         ('rsts','dummy'),
         ('crn','dummy'),     # This is the CRN
@@ -49,6 +50,7 @@ def dummy_course_request(term):
     return "rsts=dummy&crn=dummy&term_in=" + term + "&sel_subj=dummy&sel_day=dummy&sel_schd=dummy&sel_insm=dummy&sel_camp=dummy&sel_levl=dummy&sel_sess=dummy&sel_instr=dummy&sel_ptrm=dummy&sel_attr=dummy&sel_crse=&sel_title=&sel_from_cred=&sel_to_cred=&sel_ptrm=%25&begin_hh=0&begin_mi=0&end_hh=0&end_mi=0&begin_ap=x&end_ap=y&path=1&SUB_BTN=Advanced+Search" # Copied and pasted
 
 def search(term,course_codes):
+    """Full search function, and returns the parsed data from minerva"""
     subjects = []
     for code in course_codes:
         subjects.append(code.split("-")[0])

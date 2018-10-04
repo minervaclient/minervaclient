@@ -95,8 +95,8 @@ def localsys_prompt_login(sid="",pin="",temporary=False):
     if pin == "":
         pin = getpass.getpass("Enter your PIN number: ")
     if not temporary:
-        local_credentials.set_password('minervaclient_sid','minerva',sid)
-        local_credentials.set_password('minervalcient_pin','minerva',pin)
+        local_credentials.set_password('minervaclient_sid','minerva',str(sid))
+        local_credentials.set_password('minervalcient_pin','minerva',str(pin))
     return sid, pin
 
 def initial_login(sid="", pin="", inConsole=False, reLogin=False, temporary=False):
