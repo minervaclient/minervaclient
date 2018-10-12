@@ -65,9 +65,16 @@ Features to be added in the NEAR future include:
   - Obtain the list of evaluation reports on a specific instructor, or on a specific course
   - Obtain the information from an evaluation report given a report ID number (ID is found in reports listings, and is temporary)
 - The original minervac script has been moved to the `__main__` module for cross-platform compatibility
+- main function in `__main__` module now accepts arguments in its parameters, that overrides its usage as a command line tool, and is now scriptable
+- `html5lib` is now no longer a required package, however its usage is highly recommended for full functionality
+- Performed the `futurize` script on package, overhauled all the code to be compatible with Python 3, preliminary tests show that it works in both now (Python 2.7 and Python 3.5+).
 
 #### Bug Fixes:
 - Fixed visual schedule creation missing file error
+- Fixed inputting string into keyring data storing
+- Several indentation inconsistencies were corrected
+- Public Search is now case insensitive to course codes
+
 
 ### **Version 1.2.0 - June 25, 2018**
 
