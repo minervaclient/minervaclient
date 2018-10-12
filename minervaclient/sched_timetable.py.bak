@@ -1,8 +1,5 @@
 from __future__ import print_function
 from __future__ import absolute_import
-from __future__ import division
-from __future__ import unicode_literals
-from past.utils import old_div # TODO: why past.utils shows error on pylinter (py3)
 # sched_timetable.py: Generate a HTML timetable from course schedule structures
 # This file is from Minervac, a command-line client for Minerva
 # <http://npaun.ca/projects/minervac>
@@ -53,9 +50,9 @@ def calc_rowspan(time):
     t_start = dt.strptime(time['start'],config.date_fmt['short_time'])
     t_end = dt.strptime(time['end'],config.date_fmt['short_time'])
     delta = t_end - t_start
-    minutes = old_div(delta.total_seconds(), 60)
+    minutes = delta.total_seconds() / 60
     
-    return int(old_div(minutes, 25))
+    return int(minutes / 25)
 
 def make_day_header(days):
     header = """
@@ -86,7 +83,7 @@ def timetable_cell(day,course_num,entry):
 def timetable_process_timeslot(day,entries):
     for day_code in entries:
         if day in day_code:
-            course_num,entry = list(entries[day_code].items())[0]
+            course_num,entry = entries[day_code].items()[0]
             return timetable_cell(day,course_num,entry)
     
     return False

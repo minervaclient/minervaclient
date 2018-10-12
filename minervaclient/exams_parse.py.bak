@@ -1,15 +1,12 @@
-from __future__ import print_function
-from __future__ import absolute_import
-from __future__ import unicode_literals
 # exams_parse.py: Parse transcript to find courses, look up your exam time from the dataset
 # This file is from Minervac, a command-line client for Minerva
 # <http://npaun.ca/projects/minervac>
 # (C) Copyright 2016-2017 Nicholas Paun
 
 import requests,sys
-from .minerva_common import *
-from . import sched_parse,transcript_parse
-from . import config
+from minerva_common import *
+import sched_parse,transcript_parse
+import config
 from datetime import datetime as dt
 
 def get_courses(term):
@@ -32,18 +29,18 @@ def get_exam_sched(term):
     url = repo + "exams-" + term + ".json"
 
     if is_verbose():
-        print("D", url)
+        print "D", url
 
     r = requests.get(url)
     if r.status_code == 404:
-        print("""
+        print """
 * \033[1;31mExam schedule not found for requested term.\033[0m
     If the university has published a final exam schedule, contact <\x6e\151chol\141s.p\141u\x6e@\x6d\141\151l.\x6dcg\151ll.c\141>
     to prod the developer and get him to generate the dataset.
-        """)
+        """
         sys.exit(1)
     elif r.status_code != 200:
-        print("\033[1;31mFailed to load the exam schedule for requested term.\033[0m")
+        print "\033[1;31mFailed to load the exam schedule for requested term.\033[0m"
         sys.exit(1)
 
     return r.json()
@@ -78,8 +75,7 @@ def rewrite_record(record):
 
 
 
-def search_exams(sched, xxx_todo_changeme):
-    (sn,courses) = xxx_todo_changeme
+def search_exams(sched,(sn,courses)):
     entries = []
     notfound = []
     for course in courses:
@@ -127,8 +123,8 @@ def final_exam_schedule(term, report = 'exams_default'):
         sched_parse.print_sched_report(exams,report)
 
     if notfound:
-        print("")
-        print("* No records for: ")
-        print("")
+        print ""
+        print "* No records for: "
+        print ""
 
         sched_parse.print_sched_report(notfound,'exams_notfound')

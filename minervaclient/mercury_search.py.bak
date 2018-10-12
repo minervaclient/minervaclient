@@ -1,6 +1,4 @@
 from __future__ import print_function
-from __future__ import unicode_literals
-from builtins import str
 import requests
 from bs4 import BeautifulSoup
 import time
@@ -134,7 +132,7 @@ def mercury_teacherids_search(teacher_name="",teacher_id=None):
     """
     inst_ids = mercury_teacherids_get(teacher_id is not None)
 
-    items = list(inst_ids.keys())
+    items = inst_ids.keys()
     search_val = teacher_name if teacher_id is None else str(teacher_id)
     for item in items:
         if search_val.lower() in item.lower():

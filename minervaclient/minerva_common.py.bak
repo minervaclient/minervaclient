@@ -1,10 +1,5 @@
 from __future__ import print_function
 from __future__ import absolute_import
-from __future__ import unicode_literals
-from builtins import str
-from builtins import input
-from builtins import range
-from builtins import object
 # minerva_common.py: Common functions and definitions for working with Minerva
 # This file is from Minervac, a command-line client for Minerva
 # <http://npaun.ca/projects/minervac>
@@ -98,7 +93,7 @@ def localsys_prompt_login(sid="",pin="",temporary=False):
     """Prompts user for login credentials that aren't already given via the parameters. 
     Good for command line tools"""
     if sid == "":
-        sid = eval(input("Enter your Minerva ID number: "))
+        sid = input("Enter your Minerva ID number: ")
     if pin == "":
         pin = getpass.getpass("Enter your PIN number: ")
     if not temporary:
@@ -121,8 +116,6 @@ def initial_login(sid="", pin="", inConsole=False, reLogin=False, temporary=Fals
                 SID, PIN = localsys_prompt_login(sid=sid,pin=pin, temporary=temporary)
     # check param if not inConsole
     if not inConsole:
-        if localsys_has_login(): # get login from local system too
-            SID, PIN = localsys_get_login()
         if sid !="":
             SID = sid # sid is isolated so that just this can be set
         if pin !="":
@@ -179,10 +172,10 @@ def minerva_records_menu():
     minerva_get("twbkwbis.P_GenMenu?name=bmenu.P_StuMainMnu")
     minerva_get("twbkwbis.P_GenMenu?name=bmenu.P_AdminMnu")
 
-class MinervaState(object):
-        register,wait,closed,possible,unknown,wait_places_remaining,full,full_places_remaining,only_waitlist_known = list(range(9))
-class MinervaError(object):
-    reg_ok,reg_fail,reg_wait,course_none,course_not_found,user_error,net_error,require_unsatisfiable = list(range(8))
+class MinervaState:
+        register,wait,closed,possible,unknown,wait_places_remaining,full,full_places_remaining,only_waitlist_known = range(9)
+class MinervaError:
+    reg_ok,reg_fail,reg_wait,course_none,course_not_found,user_error,net_error,require_unsatisfiable = range(8)
 
 
 def get_term_code(term):
@@ -384,7 +377,7 @@ def get_grade_explanation(grade,normal_grades = False):
     }
 
     if normal_grades:
-        explanation.update(normal_explanation)
+        explanation.extend(normal_explanation)
 
     if grade in explanation:
         return explanation[grade]

@@ -2,7 +2,7 @@
 # This file is from Minervac, a command-line client for Minerva
 # <http://npaun.ca/projects/minervac>
 # (C) Copyright 2016-2017 Nicholas Paun
-
+from __future__ import unicode_literals
 #### Datasets
 data_source = ['http://cs.mcgill.ca/~npaun/mnvc-data/'] # Where should common datasets be downloaded from? There is only one option for now.
 

@@ -1,7 +1,5 @@
 from __future__ import print_function
 from __future__ import absolute_import
-from __future__ import unicode_literals
-from builtins import zip
 # transcript_parse.py: Parse unofficial transcripts into an internal representation
 # This file is from Minervac, a command-line client for Minerva
 # <http://npaun.ca/projects/minervac>

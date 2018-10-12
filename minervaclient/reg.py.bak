@@ -1,16 +1,12 @@
 from __future__ import print_function
 from __future__ import absolute_import
-from __future__ import unicode_literals
-from future import standard_library
-standard_library.install_aliases()
-from builtins import str
 # reg.py: Enrol in registrable courses, via the Quick Add/Drop interface
 # This file is from Minervac, a command-line client for Minerva
 # <http://npaun.ca/projects/minervac>
 # (C) Copyright 2016-2017 Nicholas Paun
 
 import requests
-import urllib.request, urllib.parse, urllib.error
+import urllib
 import sys
 
 #################
@@ -69,7 +65,7 @@ def check_register(term,course_codes,require_all = False,require_reg = False,dry
 
     if public_search:
         minerva_login()
-        mineva_reg_menu() # TODO: figure out what it means and define this method
+        mineva_reg_menu()
 
     current = get_registered(term)
 

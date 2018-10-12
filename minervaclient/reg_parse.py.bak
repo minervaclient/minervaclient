@@ -1,16 +1,12 @@
 from __future__ import print_function
 from __future__ import absolute_import
-from __future__ import unicode_literals
-from future import standard_library # TODO: why future import standard_library shows error on pylinter (py3)
-standard_library.install_aliases()
-from builtins import str
 # reg_parse.py: Interpret results and errors from the Quick Add/Drop interface
 # This file is from Minervac, a command-line client for Minerva
 # <http://npaun.ca/projects/minervac>
 # (C) Copyright 2016-2017 Nicholas Paun
 
 from bs4 import BeautifulSoup
-import urllib.request, urllib.parse, urllib.error
+import urllib
 import sys
 import codecs
 from .minerva_common import *
@@ -54,7 +50,7 @@ def quick_add_insert(text,crns):
             sys.exit(quick_add_issue("Wrong McGill ID or password."))
     
     
-    return urllib.parse.urlencode(request)
+    return urllib.urlencode(request)
 
 def quick_add_status(text):
     html = BeautifulSoup(text, html_parser)
@@ -111,6 +107,6 @@ def quick_add_wait(text):
         request.append((input['name'], val))
     
         if actual_wait:
-            return urllib.parse.urlencode(request)
+            return urllib.urlencode(request)
         else:
             return False

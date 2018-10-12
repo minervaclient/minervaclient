@@ -1,16 +1,12 @@
 from __future__ import print_function
 from __future__ import absolute_import
-from __future__ import unicode_literals
-from future import standard_library # TODO: why future import standard_library shows error on pylinter (py3)
-standard_library.install_aliases()
-from builtins import str
 # pub_search.py: Search for available places in requested courses (via the Display Dynamic Schedule interface)
 # This file is from Minervac, a command-line client for Minerva
 # <http://npaun.ca/projects/minervac>
 # (C) Copyright 2016-2017 Nicholas Paun
 # (C) Copyright 2018-2019 Ryan B Au
 
-import requests,urllib.request,urllib.parse,urllib.error,io,csv,sys
+import requests,urllib,StringIO,csv,sys
 from .minerva_common import *
 
 def build_request(term,codes):
@@ -61,7 +57,7 @@ def build_request(term,codes):
     for code in codes:
         req.append(('sel_subj',code.split("-")[0].upper()))
     
-    return urllib.parse.urlencode(req)
+    return urllib.urlencode(req)
 
 def search(term,course_codes):
     """Performs the POST request that pulls course information from Minerva"""
@@ -147,7 +143,7 @@ def beautify_course_info(e, Debug=False):
         ""        
     ]
     result0 = ""
-    for key,value in list(e.items()):
+    for key,value in e.items():
         result0 += key + "=>" + str(value) + " | "
     # return "\n".join(result)
     return "\n".join(result) + ((result0) if Debug else "")
@@ -155,15 +151,8 @@ def beautify_course_info(e, Debug=False):
 
 def parse_results(text):
     # converts the HTTP request data from Minerva into a logical format in a python dictionary
-    
-    # stream = io.StringIO(text.encode('ascii','ignore'))
-    # print(type(text))
-    if type(text) == type(u''):
-        text = text.encode('ascii','ignore')
-        text = text.decode('utf-8','strict')
-    elif type(text) == str:
-        pass
-    stream = io.StringIO(text)
+
+    stream = StringIO.StringIO(text.encode("ascii","ignore"))
     field_names = ['crn','subject','course','section','type','credits','title','days','time','cap','wl_cap','wl_act','wl_rem','instructor','date','location','status']
     file = csv.DictReader(stream,field_names)
 

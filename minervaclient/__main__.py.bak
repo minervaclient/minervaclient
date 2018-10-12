@@ -7,8 +7,6 @@
 
 
 from __future__ import print_function
-from builtins import input
-from builtins import object
 from minervaclient import reg,sched,exams,transcript,pub_search
 from minervaclient.minerva_common import *
 from minervaclient import minerva_common
@@ -300,7 +298,7 @@ def exec_login(args):
         pin = args.password
     if (not (args.quiet or args.re_login)) and( has_login() or localsys_has_login()):
         try:
-            if eval(input("Do you want to re-enter your login information? (y/n) default:[y]")) == 'n':
+            if input("Do you want to re-enter your login information? (y/n) default:[y]") == 'n':
                 return
         except SyntaxError:
             pass
@@ -350,7 +348,7 @@ class AliasedSubParsersAction(argparse._SubParsersAction):
 
         return parser
 
-class ShellWrapper(object):
+class ShellWrapper():
     def __init__(self):
         self.ap = argparse.ArgumentParser()
         self.ap.register('action', 'parsers', AliasedSubParsersAction)
@@ -411,7 +409,7 @@ class MinervaShell(Cmd):
         print("\nYour login information will be retained for the duration of this session")
         print("Possible shell commands include:\n")
         
-        for name, descript in list(self.subcommand_desc.items()):
+        for name, descript in self.subcommand_desc.items():
             print("\t%-20s" % (name) + descript)
         print("\n\t%-20s" % ("exit") + "Exit the interpreter, and end this session")
         print("\nHelp commands take the form of either:\n help reg || ? reg || reg -h || reg --help")

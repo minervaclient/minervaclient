@@ -1,6 +1,4 @@
 from __future__ import print_function
-from __future__ import unicode_literals
-from builtins import str
 import requests
 from bs4 import BeautifulSoup
 import time
@@ -169,7 +167,7 @@ def print_ecalendar(term_year, subject_code, page_parts = ['title','overview'], 
             print( str(e)+" " + code + " ",end="")
     print("")
     for ecalendar_obj in ecalendar_list:
-        for key,value in list(ecalendar_obj.items()):
+        for key,value in ecalendar_obj.items():
             if key in page_parts:
                     print("%-20s" % (key.upper()) +  filter_for_ascii(value))
         print("")

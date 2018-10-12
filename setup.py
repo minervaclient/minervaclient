@@ -34,4 +34,4 @@ setup(name='minervaclient',
     long_description_content_type='text/markdown',
     include_package_data = True
     )
-print "the packages 'beautifulsoup4' and 'html5lib' are for webpage creation of schedules"
+print( "The packages 'html5lib' and 'keyring' are needed for full support")
