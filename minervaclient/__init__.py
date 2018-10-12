@@ -60,7 +60,33 @@ Fixed Bugs:
 """
 
 __version__='1.3.0'
-""" Version 1.3.0 - August 5th, 2018
+""" Version 1.3.0 - July 17, 2018
+
+New Features:
+
+- eCalendar scraping added to library
+  - Scrape Course eCalendar page for Overview, Title, Notes, Faculty, Instructors, Terms
+  - Requisite Courses Extraction (WIP)
+  - Tool to convert typical term code to an eCalendar school year code
+  - Includes tool to print the information of the all the available courses of a given subject
+- Remembering of Minerva credentials in native terminal/console. Implemented `keyring` module for secure credentials storage in system keyring.
+  - Made usage of 'keyring' an extra that will be installable by pip via `pip install minervaclient[cli_features]`
+- Minerva search function now accepts course codes case insensitive (always converts to uppercase)
+- Mercury Evaluation scraping tools added to library
+  - Search for Instructors based on either a given name or ID number, can be partial, and obtain full name and ID number
+  - Obtain the list of evaluation reports on a specific instructor, or on a specific course
+  - Obtain the information from an evaluation report given a report ID number (ID is found in reports listings, and is temporary)
+- The original minervac script has been moved to the `__main__` module for cross-platform compatibility
+- main function in `__main__` module now accepts arguments in its parameters, that overrides its usage as a command line tool, and is now scriptable
+- `html5lib` is now no longer a required package, however its usage is highly recommended for full functionality
+- Performed the `futurize` script on package, overhauled all the code to be compatible with Python 3, preliminary tests show that it works in both now (Python 2.7 and Python 3.5+).
+
+Bug Fixes:
+
+- Fixed visual schedule creation missing file error
+- Fixed inputting string into keyring data storing
+- Several indentation inconsistencies were corrected
+- Public Search is now case insensitive to course codes
 
 """
 
