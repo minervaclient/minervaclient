@@ -56,7 +56,7 @@ def rewrite_record(record):
     record['time'] = time.strftime(config.date_fmt['exam_time'])
 
 
-    if 'date_2' in record and date_2 != '':
+    if 'date_2' in record and date_2 != '': # TODO: Figure out where date_2 comes from
         date_2 = dt.strptime(record['date_2'],iso_date['date'])
 
         if date_1.month == date_2.month:
