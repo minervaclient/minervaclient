@@ -60,5 +60,7 @@ END:VCALENDAR"""
     return cal
 
 def export_schedule(term,report = 'cal_exams'):
+    minerva_output = MinervaOutput(inConsole=True)
     exams = exams_parse.find_exams(term,return_notfound=False)
-    print(export_ics_sched(exams,report).encode("utf8").replace("\n","\r\n"))
+    minerva_output.print(export_ics_sched(exams,report).encode("utf8").replace("\n","\r\n"))
+    return minerva_output.get_content()

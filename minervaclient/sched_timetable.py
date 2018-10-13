@@ -15,7 +15,7 @@ from .minerva_common import *
 
 def timetable_report(text,report = 'timetable_default'):
     sched = sched_parse.parse_schedule(text,separate_wait = False)
-    timetable_html(timetable_struct(sched,report))
+    return timetable_html(timetable_struct(sched,report))
     
 
 def timetable_struct(sched,report = 'timetable_default'):
@@ -113,12 +113,15 @@ def make_style_header():
     return header
 
 def timetable_html(timetable):
+    """Prints out the timetable data in the form of an html webpage"""
+    minerva_output = MinervaOutput(inConsole=True)
+
     colspan.spans = {}
     course_times = ['08h05','08h35','09h05','09h35','10h05','10h35','11h05','11h35','12h05','12h35','13h05','13h35','14h05','14h35','15h05','15h35','16h05','16h35','17h05','17h35']
 
     days = get_minerva_weekdays(config.show_weekend)
     
-    print("""
+    minerva_output.print("""
     <!DOCTYPE html>
     <html>
         <head>
@@ -135,7 +138,7 @@ def timetable_html(timetable):
     """.format(style=make_style_header(),days=make_day_header(days)))
     
     for time in course_times:
-        print("""
+        minerva_output.print("""
         <tr class='sched-row'>
             <th class='sched-timeslot'>{time}</th>
         """.format(time=timeslot_format(time)))
@@ -143,20 +146,21 @@ def timetable_html(timetable):
         for day in days:
             if time in timetable:
                 cell = timetable_process_timeslot(day,timetable[time])
-                if cell: print(cell)
+                if cell: minerva_output.print(cell)
             
             if colspan(day):
-                print("\t<td class='sched-blank'>&nbsp;</td>")
+                minerva_output.print("\t<td class='sched-blank'>&nbsp;</td>")
     
 
             colspan(day,'-')
 
-        print("""
+        minerva_output.print("""
         </tr>
         """)
 
-    print("""
+    minerva_output.print("""
     </table>
     </body>
     </html>
     """)
+    return minerva_output.get_content()

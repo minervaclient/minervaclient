@@ -85,6 +85,8 @@ def check_register(term,course_codes,require_all = False,require_reg = False,dry
 
 def check_courses(courses,codes,require_all = False,require_reg = False):
     """Checks a series of given courses and codes, queries Minerva to see the status of being able to register for these"""
+    minerva_output = MinervaOutput(inConsole=True)
+
     crns = []
     course_ok = []
 
@@ -92,53 +94,53 @@ def check_courses(courses,codes,require_all = False,require_reg = False):
         valid_state = False
 
         if code not in courses:
-            print("* Course %s cannot be found. Failure." % code)
+            minerva_output.print("* Course %s cannot be found. Failure." % code)
             sys.exit(MinervaError.course_not_found)
 
         course = courses[code]
-        sys.stdout.write("[" + code + "] ")
+        minerva_output.write("[" + code + "] ")
 
         if course['select'] == MinervaState.possible:
-            sys.stdout.write("* Minerva permits registration ")
+            minerva_output.write("* Minerva permits registration ")
             if course['_state'] == MinervaState.register:
-                sys.stdout.write("in course.\n")
+                minerva_output.write("in course.\n")
                 valid_state = True
             elif course['_state'] == MinervaState.wait:
-                sys.stdout.write("on waitlist.\n")
+                minerva_output.write("on waitlist.\n")
                 valid_state = True
-                print("\t\t You will be in position " + str(course['wait']['act'] + 1) + ".")
+                minerva_output.print("\t\t You will be in position " + str(course['wait']['act'] + 1) + ".")
             elif course['_state'] == MinervaState.wait_places_remaining:
-                sys.stdout.write("on waitlist, and places remain in the course.\n")
+                minerva_output.write("on waitlist, and places remain in the course.\n")
                 valid_state = True
-                print("\t\t You will be in position " + str(course['wait']['act'] + 1) + ".")
+                minerva_output.print("\t\t You will be in position " + str(course['wait']['act'] + 1) + ".")
             elif course['_state'] == MinervaState.full:
-                sys.stdout.write("but waitlist is reported full.\n")
+                minerva_output.write("but waitlist is reported full.\n")
             elif course['_state'] == MinervaState.full_places_remaining:
-                sys.stdout.write("but waitlist is reported full (places remain in the class).\n")
+                minerva_output.write("but waitlist is reported full (places remain in the class).\n")
             else:
-                sys.stdout.write("but the current state is unexpected.\n")
+                minerva_output.write("but the current state is unexpected.\n")
 
             if not require_reg or (require_reg and valid_state):
                 crns.append(course['crn'])
                 course_ok.append(course['_code'])
         elif course['select'] == MinervaState.only_waitlist_known:
             if course['_state'] == MinervaState.wait:
-                print("* Minerva indicates room on waitlist.")
+                minerva_output.print("* Minerva indicates room on waitlist.")
                 valid_state = True
                 crns.append(course['crn'])
                 course_ok.append(course['_code'])
             else:
-                print("* Minerva does not show room on waitlist.")
+                minerva_output.print("* Minerva does not show room on waitlist.")
         else:
-            print("* Minerva prohibits registration.")
-            print("\t\t The status on Minerva is " + course['status'])
-
+            minerva_output.print("* Minerva prohibits registration.")
+            minerva_output.print("\t\t The status on Minerva is " + course['status'])
+    # return minerva_output.get_content()
 
     if require_all and len(courses) != len(crns):
-        print("* Some courses cannot be registered. The require all constraint is unsatisfiable.")
+        minerva_output.print("* Some courses cannot be registered. The require all constraint is unsatisfiable.")
         sys.exit(MinervaError.require_unsatisfiable)
     elif len(crns) == 0:
-        print("* No courses can be registered. Failure.")
+        minerva_output.print("* No courses can be registered. Failure.")
         sys.exit(MinervaError.course_none)
 
     return (crns,course_ok)

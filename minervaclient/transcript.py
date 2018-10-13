@@ -14,4 +14,4 @@ def get_transcript(terms = None,report = 'transcript_default',show = ['summary',
     minerva_login()
     minerva_records_menu()
     r = minerva_get("bzsktran.P_Display_Form?user_type=S&tran_type=V")
-    transcript_parse.transcript_report(r.text,terms,report,show)
+    return transcript_parse.transcript_report(r.text,terms,report,show)

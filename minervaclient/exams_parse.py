@@ -121,14 +121,16 @@ def find_exams(term,return_notfound = True):
         return found
 
 def final_exam_schedule(term, report = 'exams_default'):
+    minerva_output = MinervaOutput(inConsole=True)
     exams,notfound = find_exams(term,return_notfound = True)
 
     if exams:
-        sched_parse.print_sched_report(exams,report)
+        minerva_output.append(sched_parse.print_sched_report(exams,report))
 
     if notfound:
-        print("")
-        print("* No records for: ")
-        print("")
+        minerva_output.print("")
+        minerva_output.print("* No records for: ")
+        minerva_output.print("")
 
-        sched_parse.print_sched_report(notfound,'exams_notfound')
+        minerva_output.append(sched_parse.print_sched_report(notfound,'exams_notfound'))
+    return minerva_output.get_content()

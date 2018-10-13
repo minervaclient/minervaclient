@@ -113,6 +113,8 @@ END:VCALENDAR"""
     return cal
 
 def export_schedule(text,report = 'cal'):
+    minerva_output = MinervaOutput(inConsole=True)
     sched = sched_parse.parse_schedule(text,separate_wait = False)
-    print(export_ics_sched(sched,report).encode("utf8").replace("\n","\r\n"))
+    minerva_output.print(export_ics_sched(sched,report).encode("utf8").replace("\n","\r\n"))
+    return minerva_output.get_content()
 

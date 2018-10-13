@@ -18,15 +18,18 @@ def course_details(term,report = 'default',visual = False,calendar = False,confl
     minerva_get('bwskfshd.P_CrseSchdDetl')
     r = minerva_post('bwskfshd.P_CrseSchdDetl',{'term_in': term})
 
+    minerva_output = MinervaOutput(inConsole=True)
+
     if visual:
-        sched_timetable.timetable_report(r.text,report)
+        minerva_output.append(sched_timetable.timetable_report(r.text,report))
     elif calendar:
-        sched_ics.export_schedule(r.text,report)
+        minerva_output.append(sched_ics.export_schedule(r.text,report))
     elif conflicts_only:
-        sched_parse.conflict_report(r.text,report)
+        minerva_output.append(sched_parse.conflict_report(r.text,report))
     else:
-        sched_parse.course_details_report(r.text,report)
+        minerva_output.append(sched_parse.course_details_report(r.text,report))
         if not no_conflicts:
-            sched_parse.conflict_report(r.text,'conflicts')
+            minerva_output.append(sched_parse.conflict_report(r.text,'conflicts'))
+    return minerva_output.get_content()
 
 

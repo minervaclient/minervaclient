@@ -217,6 +217,7 @@ def load_transcript_format(report):
         return (fmt_1,fmt_2,fmt_3)
 
 def print_transcript(trans,terms = None,report = 'transcript_default',show = ['summary','credit','grades']):
+        minerva_output = MinervaOutput(inConsole=True)
         if 'header' not in show:
                 del trans['000000']
 
@@ -230,19 +231,20 @@ def print_transcript(trans,terms = None,report = 'transcript_default',show = ['s
                 (info_fmt,gpa_fmt,grades_fmt) = load_transcript_format(report)
 
                 if 'summary' in show:
-                        sys.stdout.write(sched_parse.apply_format(termv['info'],info_fmt))
+                        minerva_output.write(sched_parse.apply_format(termv['info'],info_fmt))
 
                 if 'credit' in show and 'tgpa' in termv['info']:
-                        sys.stdout.write(sched_parse.apply_format(termv['info'],gpa_fmt))
+                        minerva_output.write(sched_parse.apply_format(termv['info'],gpa_fmt))
 
 
                 if 'grades' in show and termv['grades']:
                         sort = config.reports[report]['sort']
                         grades = sched_parse.multi_keysort(termv['grades'],sort)
-                        print("")
+                        minerva_output.print("")
                         for grade in grades:
-                                sys.stdout.write(sched_parse.apply_format(grade,grades_fmt))
+                                minerva_output.write(sched_parse.apply_format(grade,grades_fmt))
+        return minerva_output.get_content()
 
 def transcript_report(text,terms = None,report = 'transcript_default',show = ['summary','credit','grades']):
         trans = parse_transcript(text)
-        print_transcript(trans,terms,report,show)
+        return print_transcript(trans,terms,report,show)

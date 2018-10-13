@@ -14,8 +14,8 @@ from . import exams_parse,exams_ics
 def final_exams(term,report = 'exams_default',calendar = False):
     """Gets the final exam schedule, optionally in the form of a report or as a calendar"""
     if calendar:
-        exams_ics.export_schedule(term,report)
+        return exams_ics.export_schedule(term,report)
     else:
-        exams_parse.final_exam_schedule(term,report)
+        return exams_parse.final_exam_schedule(term,report)
 
 

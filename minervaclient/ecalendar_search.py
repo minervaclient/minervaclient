@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 import time
 
 from . import pub_search
-from .minerva_common import get_term_code
+from .minerva_common import get_term_code, MinervaOutput
 
 def filter_for_ascii(text, placeholder="_"):
     """Some unicode characters are used in the eCalendar, and some command line consoles don't like this, so this script replaces characters that give Exceptions
@@ -150,8 +150,10 @@ def print_ecalendar(term_year, subject_code, page_parts = ['title','overview'], 
     page_parts by default displays 'title' and 'overview'. 
         Options include: 'terms', 'instructors', 'notes', 'faculty_offer', 'offer_link', 'offer_link_text'
     time_interval by default is 0.5 seconds, and is small pause between http requests, just in case the site blocks you for some reason"""
+    minerva_output = MinervaOutput(inConsole=True)
+    
     subject_keys = query_courses_by_subject(term_year, subject_code)
-    # print(subject_keys)
+    # minerva_output.print(subject_keys)
     ecalendar_list = []
     counter = 0
     for code in subject_keys: 
@@ -163,16 +165,17 @@ def print_ecalendar(term_year, subject_code, page_parts = ['title','overview'], 
         try:
             counter+=1
             ecalendar_list.append( ecalendar_get(convert_ecalendar_term(term_year), code) )
-            print( ". ",end="")
+            minerva_output.print( ". ",end="")
             time.sleep(time_interval)
         except Exception as e:
-            print( str(e)+" " + code + " ",end="")
-    print("")
+            minerva_output.print( str(e)+" " + code + " ",end="")
+    minerva_output.print("")
     for ecalendar_obj in ecalendar_list:
         for key,value in list(ecalendar_obj.items()):
             if key in page_parts:
-                    print("%-20s" % (key.upper()) +  filter_for_ascii(value))
-        print("")
+                    minerva_output.print("%-20s" % (key.upper()) +  filter_for_ascii(value))
+        minerva_output.print("")
+    return minerva_output.get_content()
 
 # Test code to see what this can do
 # term_year = '201809'

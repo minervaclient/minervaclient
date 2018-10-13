@@ -428,13 +428,15 @@ def fetch_buildings_table():
     print("Downloading buildings database.....")
 
     r  = requests.get(url)
+    buildings_json = r.text.encode('UTF-8')
     if r.status_code != 200:
         print("\033[1;31mFailed to download buildings table.")
         sys.exit(1)
 
     f = open('buildings.json','w')
-    f.write(r.text.encode('UTF-8'))
+    f.write(buildings_json)
     f.close()
+    return buildings_json
 
 
 def get_bldg_name(code):
@@ -455,6 +457,34 @@ def get_bldg_name(code):
     else:
         return code #If we don't know, just stick with what we have
 
+class MinervaOutput(object):
+    output_string = ""
+    output_dict = {}
+    def __init__(self, inConsole=False, isJson=False, isCsv=False):
+        self.inConsole = inConsole
+        self.isJson = isJson
+        self.isCsv = isCsv
+
+    def get_content(self):
+        """Return the content stored either json, csv, or humean readable format"""
+        return self.output_string
+
+    def write(self, data):
+        self.output_string += str(data)
+        if self.inConsole:
+            # if in the console, we're outputting to the sys.stdout
+            sys.stdout.write(data)
+    
+    def print(self, *args, **kwargs):
+        """Wrapper for potential usage of print function (py3)"""
+        data = " ".join(map(str,args))
+        self.output_string += str(data) + "\n"
+        if self.inConsole:
+            # if in the console, we're printing the output
+            print(data, **kwargs)
+    def append(self, data):
+        """For appending any string data to the output_string"""
+        self.output_string += data + '\n'
 
 iso_date  = {
         'date': '%Y-%m-%d',

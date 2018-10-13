@@ -129,23 +129,28 @@ def parse_schedule(text,separate_wait = True):
         return entries
 
 def print_sched(sched,columns):
-
+    minerva_output = MinervaOutput(inConsole=True)
     for entry in sched:
         for col in columns:
             if col in entry:
-                sys.stdout.write(entry[col] + "\t")
+                minerva_output.write(entry[col] + "\t")
             else:
-                sys.stdout.write(col)
+                minerva_output.write(col)
 
-        print("")
+        minerva_output.print("")
+    return minerva_output.get_content()
 
 
 def print_sched_report(sched,report = 'default'):
+    minerva_output = MinervaOutput(inConsole=True)
     (fmt,sched) = prepare_report(report,sched)
 
-    for entry in sched: sys.stdout.write(apply_format(entry,fmt))
+    for entry in sched: 
+        minerva_output.write(apply_format(entry,fmt))
+    return minerva_output.get_content()
 
 def find_conflicts(sched,report = 'conflicts'):
+    minerva_output = MinervaOutput(inConsole=True)
     (fmt,sched) = prepare_report(report,sched,sort = False)
 
     instances = []
@@ -173,14 +178,17 @@ def find_conflicts(sched,report = 'conflicts'):
             continue
         elif (c_start < n_end) and (c_end > n_start): #Formal definition of a time conflict
             conflict_pairs.append(pair)
-            print_conflict(fmt,c_entry,n_entry)
+            minerva_output.append(print_conflict(fmt,c_entry,n_entry))
+    return minerva_output.get_content()
 
     
-def print_conflict(fmt,curr,next):    
+def print_conflict(fmt,curr,next):
+        minerva_output = MinervaOutput(inConsole=True)  
         intersect = "".join(list(set(curr['days']).intersection(set(next['days']))))
-        print("* Conflict: \033[1;31m%s %s-%s\033[0m" % (intersect,next['_time']['start'], curr['_time']['end']))
-        sys.stdout.write(apply_format(curr,fmt))
-        sys.stdout.write(apply_format(next,fmt))
+        minerva_output.print("* Conflict: \033[1;31m%s %s-%s\033[0m" % (intersect,next['_time']['start'], curr['_time']['end']))
+        minerva_output.write(apply_format(curr,fmt))
+        minerva_output.write(apply_format(next,fmt))
+        return minerva_output.get_content()
 
 
 def prepare_report(report,sched,sort = True):
@@ -255,20 +263,22 @@ def day_index(days):
     return index.ljust(7,'0')
 
 def course_details_report(text,report = 'default'):
+    minerva_output = MinervaOutput(inConsole=True)
     reg,wait = parse_schedule(text)
     if reg:
-        print("")
-        print("* Registered:")
-        print_sched_report(reg,report)
+        minerva_output.print("")
+        minerva_output.print("* Registered:")
+        minerva_output.append(print_sched_report(reg,report))
     
     if wait:
-        print("")
-        print("* Waitlist / Withdrawn / Other:")
-        print_sched_report(wait,report)
+        minerva_output.print("")
+        minerva_output.print("* Waitlist / Withdrawn / Other:")
+        minerva_output.append(print_sched_report(wait,report))
+    return minerva_output.get_content()
 
 def conflict_report(text,report = 'conflicts'):
     sched = parse_schedule(text,separate_wait = False)
-    find_conflicts(sched,report)
+    return find_conflicts(sched,report)
 
 
 
