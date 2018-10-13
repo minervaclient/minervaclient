@@ -69,6 +69,7 @@ def parse_transcript(subp):
 def parse_search(subp):
     parser = subp.add_parser('search',help='Search for a course', add_help=False)
     parser.add_argument("-t","--term",help="The term (e.g. FALL2016, 201609, etc.) in which to register for these courses",required=True)
+    parser.add_argument("-C","--course-type",help="Manually enter the type of section to view (e.g. Lecture, Conference, \"Midterm Exam\", Tutorial)")
     parser.add_argument("-L", "--lecture-only", help="Show only courses that are Lecture types",action="store_true")
     parser.add_argument("-T", "--tutorial-only", help="Show only courses that are Tutorial types",action="store_true")
     parser.add_argument("-A", "--availability-only", help="Show only availability information",action="store_true")
@@ -283,7 +284,9 @@ def exec_search(args):
     # print courses
     print("")
     cType = ""
-    if(args.lecture_only):
+    if(args.course_type is not None):
+        cType = args.course_type
+    elif(args.lecture_only):
         cType = "Lecture"
     elif(args.tutorial_only):
         cType = "Tutorial"

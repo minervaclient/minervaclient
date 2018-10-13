@@ -121,29 +121,41 @@ def quick_search(term, course_codes, course_type=""):
 
 def print_search(term,course_codes, cType, avail=False, verbose=False, Debug=False):
     """Print out all of the courses and their variations really nicely for the command line interface"""
+    minerva_output = MinervaOutput(inConsole=True)
+
     full_codes, courses_obj = quick_search(term,course_codes, cType)
     if(Debug):
-        print(full_codes + "\n")
+        minerva_output.print(full_codes)
     full_codes.sort()
 
     for full_code in full_codes:
         course = courses_obj[full_code.upper()]
         if(avail and not (verbose or Debug)):
-            print(str(course['_code']), end=' ')
-            print(" CRN: %-6s" % (str(course['crn'])), end=' ')
-            print(" Seats Remaining: %-8s" % ( str(course['wait']['rem']) +"/" + str(course['wait']['cap']) ), end=' ')
-            print(" Waitlist: %-8s" % ( str(course['wl_rem']) + "/" +str(course['wl_cap']) ))
+            minerva_output.print(str(course['_code']), end=' ')
+            minerva_output.print(" CRN: %-6s" % (str(course['crn'])), end=' ')
+            minerva_output.print(" Capacity: %-4s" % ( str(course['reg']['cap']) ), end=' ')
+            minerva_output.print(" Seats (remain): %-8s" % ( str(course['wait']['rem']) +"/" + str(course['wait']['cap']) ), end=' ')
+            minerva_output.print(" Seats (actual): %-8s" % ( str(course['wait']['act']) +"/" + str(course['wait']['cap']) ), end=' ')
+            minerva_output.print(" Waitlist (remain): %-8s" % ( str(course['wl_rem']) + "/" +str(course['wl_cap']) ), end=' ')
+            minerva_output.print(" Waitlist (actual): %-8s" % ( str(course['wl_act']) + "/" +str(course['wl_cap']) ))
         else:
-            print(beautify_course_info(course, (verbose or Debug)))
+            minerva_output.print(beautify_course_info(course, (verbose or Debug)))
+    return minerva_output.get_content()
 
 def beautify_course_info(e, Debug=False):
     # accept a specific course's information in the form of a dictionary and formats it to look nice for the command line interface. 
     # set Debug to True to see the all of the original keys and values paired together concatenated to the end of the original outpute
+    seats_remain = str(e['wait']['rem']) +"/" + str(e['wait']['cap'])
+    seats_actual = str(e['wait']['act']) +"/" + str(e['wait']['cap'])
+    wait_remain = str(e['wl_rem']) + "/" +str(e['wl_cap'])
+    wait_actual = str(e['wl_act']) + "/" +str(e['wl_cap'])
+    capacity = str(e['reg']['cap'])
     result = [
-        e['title'],
+        str(e['_code']) + " CRN: "+ str(e['crn']) +" | "+ e['title'],
         e['type'] +" Instructor: "+ e['instructor'] +" | Credits: "+str( e['credits'] ) ,
-        str(e['_code']) + " CRN: "+ str(e['crn']) + " Seats Remaining: " + str(e['wait']['rem']) +"/" + str(e['wait']['cap']) + " Waitlist: " + str(e['wl_rem']) + "/" +str(e['wl_cap']),
-        e['location'] + " " + e['days'] + " " + e['time'] + " Period: " + e['date'],
+        "Capacity: "+ capacity +" | Seats(remains): " + seats_remain + " | Waitlist(remains): " + wait_remain,
+        "Seats(actual): " + seats_actual + " | Waitlist(actual): " + wait_actual,
+        e['location'] + " " + e['days'] + " " + e['time'] + " | Period: " + e['date'],
         ""        
     ]
     result0 = ""
