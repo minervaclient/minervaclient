@@ -20,7 +20,7 @@ setup(name='minervaclient',
     scripts=['scripts/minervac','scripts/minervac.bat'],
     classifiers=[],
     install_requires=[
-        'requests', 'beautifulsoup4'
+        'requests', 'beautifulsoup4','future'
     ],
     dependency_links=[
         'https://github.com/frispete/keyrings.cryptfile/archive/v1.2.1.zip',

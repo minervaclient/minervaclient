@@ -180,28 +180,32 @@ def minerva_records_menu():
     minerva_get("twbkwbis.P_GenMenu?name=bmenu.P_AdminMnu")
 
 class MinervaState(object):
-        register,wait,closed,possible,unknown,wait_places_remaining,full,full_places_remaining,only_waitlist_known = list(range(9))
+    register,wait,closed,possible,unknown,wait_places_remaining,full,full_places_remaining,only_waitlist_known = list(range(9))
 class MinervaError(object):
     reg_ok,reg_fail,reg_wait,course_none,course_not_found,user_error,net_error,require_unsatisfiable = list(range(8))
-
+class OutputType(object):
+    json,csv,pretty = list(range(3))
 
 def get_term_code(term):
     """Converts different variations of term codes into the yyyymm format for HTTP requests
     
-    acceptable codes include:  FALL09, 2016-FALL, SUMMER-2017, 2016SUMMER, 2017-WINTER
+    acceptable codes include:  FALL09, 2016-FALL, SUMMER-2017, 2016SUMMER, 2017-WINTER, 201809, 201701
     """
+    if len(term) < 6: # in case term too small to cut
+        return term
+
     part_codes = {'FALL': '09', 'FALL-SUP': '10', 'WINTER': '01', 'WINTER-SUP': '02', 'SUMMER': '05', 'SUMMER-SUP': '06'}
     if term == "PREVIOUSEDUCATION":
         return '000000' # Sort first
-    elif term.isdigit(): # Term code
+    elif term.isdigit(): # Term code 201809...
         return term
-    elif term[0].isdigit(): #Year first
-        year = term[0:4]
-        if term[4] == '-':
-            part = term[5:]
+    elif term[0].isdigit(): #Year first, 2016-FALL, 2016SUMMER
+        year = term[0:4]  # First four digits
+        if term[4] == '-': # get season after dash (if exists)
+            part = term[5:] 
         else:
             part = term[4:]
-        part = part_codes[part.upper()]
+        part = part_codes[part.upper()] # convert season to number
 
     else:
         year = term[-4:]
@@ -460,10 +464,24 @@ def get_bldg_name(code):
 class MinervaOutput(object):
     output_string = ""
     output_dict = {}
-    def __init__(self, inConsole=False, isJson=False, isCsv=False):
+    def __init__(self, inConsole=False, fmt=-1, isJson=False, isCsv=False, isPretty=True):
         self.inConsole = inConsole
+
+        # if the fmt is set to an OutputType, then set a style output to it
+        if fmt > -1:
+            isJson   = False
+            isCsv    = False
+            isPretty = False
+            if fmt == OutputType.json:
+                isJson = True
+            elif fmt == OutputType.csv:
+                isCsv = True
+            elif fmt == OutputType.pretty:
+                isPretty = True
+        # if no fmt is set, then it uses the defaults
         self.isJson = isJson
         self.isCsv = isCsv
+        self.isPretty = isPretty
 
     def get_content(self):
         """Return the content stored either json, csv, or humean readable format"""

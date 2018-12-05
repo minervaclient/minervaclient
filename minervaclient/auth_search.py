@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 from __future__ import unicode_literals
+from __future__ import print_function
 from future import standard_library # TODO: why future import standard_library shows error on pylinter (py3)
 standard_library.install_aliases()
 # auth_search.py: Search for available places in requested courses (via the Minerva interface)
@@ -28,9 +29,10 @@ def make_course_request(term,subjects):
         ('sel_attr','dummy'),
         ('sel_subj','dummy')]
 
-    for subj in subjects: request.append(('sel_subj',subj))
+    for subj in subjects:
+        request.append(('sel_subj',subj))
     request.extend([
-        ('sel_crse','206'),    # Course code
+        ('sel_crse',''),    # Course code
         ('sel_title',''),
         ('sel_schd','%'),
         ('sel_from_cred',''),
@@ -59,6 +61,7 @@ def search(term,course_codes):
     subjects = []
     for code in course_codes:
         subjects.append(code.split("-")[0])
+        # subjects.append(code)
 
     # initial_login()
     # if localsys_has_login() and DEBUG:
@@ -73,3 +76,27 @@ def search(term,course_codes):
     return auth_search_parse.search_parse(r.text)
     # return r.text
 
+def beautify_course_info(e, Debug=False):
+    # accept a specific course's information in the form of a dictionary and formats it to look nice for the command line interface. 
+    # set Debug to True to see the all of the original keys and values paired together concatenated to the end of the original outpute
+    seats_remain = str(e['wait']['rem']) +"/" + str(e['wait']['cap'])
+    seats_actual = str(e['wait']['act']) +"/" + str(e['wait']['cap'])
+    wait_remain = str(e['reg']['rem']) +"/" + str(e['reg']['cap'])
+    wait_actual = str(e['reg']['act']) +"/" + str(e['reg']['cap'])
+    capacity = str(e['reg']['cap'])
+    result = [
+        str(e['_code']) + " CRN: "+ str(e['crn']) +" | "+ e['title'],
+        str(e['type']) +" Instructor: "+ dequebecify(e['instructor']) +" | Credits: "+str( e['credits'] ) ,
+        "Capacity: "+ capacity +" | Seats(remains): " + seats_remain + " | Waitlist(remains): " + wait_remain,
+        "Seats(actual): " + seats_actual + " | Waitlist(actual): " + wait_actual,
+        str(e['location']) + " " + str(e['days']) + " " + " | Period: " + str(e['date']),
+        ""        
+    ]
+    result0 = ""
+    for key,value in list(e.items()):
+        try:
+            result0 += key + "=>" + str(value) + " | "
+        except:
+            result0 += key + "=>" + dequebecify(value) + " | "
+    # return "\n".join(result)
+    return "\n".join(result) + ((result0) if Debug else "")
