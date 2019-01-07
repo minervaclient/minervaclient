@@ -31,7 +31,6 @@ def quick_add_insert(text,crns):
 
 
     for input in inputs:
-        
         if not input.has_attr('name'):
             if input.has_attr('id'):
                 print("A problem occurred:")
@@ -46,8 +45,9 @@ def quick_add_insert(text,crns):
 
         if val == 'Class Search':  #We want to register and not search,
             continue
-            if crns and input['name'] == 'CRN_IN' and val == '':  # Shove our CRN in the first blank field
-                val = crns.pop(0)
+        if crns and input['name'] == 'CRN_IN' and val == '':  # Shove our CRN in the first blank field
+            # print(input) # DEBUG
+            val = crns.pop(0)
         try:
             request.append((input['name'], val))
         except KeyError:
@@ -69,6 +69,7 @@ def quick_add_status(text):
             return MinervaError.reg_fail
     
 
+    # print(html.body) # DEBUG
     print("\033[1m* Registration probably succeeded.\033[0m")
     return MinervaError.reg_ok
 
