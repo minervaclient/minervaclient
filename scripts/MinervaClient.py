@@ -118,11 +118,12 @@ class MinervaCommon(object):
         'full': '%b %d, %Y %I:%M %p'
     }
     def __init__(self):
-        self.is_minerva_based = True # Uses sid and pin, instead of username(mcgill email) and password
-        self.username=""
-        self.password=""
-        self.sid=""
-        self.pin=""
+        # self.is_minerva_based = True # Uses sid and pin, instead of username(mcgill email) and password
+        # self.username=""
+        # self.password=""
+        self.sid = ""
+        self.pin =""
+        self.mcgill_id = ""
 
         self.cookie_data = {}
         self.referer = ""
@@ -156,12 +157,12 @@ class MinervaCommon(object):
         return r
     def _minerva_login_request(self):
         """Login http request is sent for the user, utilizing the credentials stored
-        for the sid(minerva only) and pin(minerva only)
+        for the sid and pin
         """
         if not self.verify_email_credentials(verbose=False) and not self.verify_sid_credentials(verbose=False):
             raise ValueError("Invalid credentials given. Set a proper SID and PIN before logging in")
-        sid = self.sid if self.is_minerva_based else self.username
-        pin = self.pin if self.is_minerva_based else self.password
+        sid = self.sid
+        pin = self.pin
         self._minerva_get("twbkwbis.P_WWWLogin")
         self._minerva_post("twbkwbis.P_ValLogin",{'sid': sid, 'PIN': pin})
         r = self._minerva_get("twbkwbis.P_GenMenu?name=bmenu.P_MainMnu")
@@ -174,19 +175,19 @@ class MinervaCommon(object):
         self._minerva_get("twbkwbis.P_GenMenu?name=bmenu.P_StuMainMnu")
         return self._minerva_get("twbkwbis.P_GenMenu?name=bmenu.P_AdminMnu")
 
-    def set_email_credentials(self, username="",password="", verbose=None):
-        """Sets the values for the username and password (from mcgill email)
-        """
-        if verbose is None: verbose = self.show_err
-        self.username = username
-        self.password = password
-        try:
-            local_credentials.set_password('minervaclient_username','minerva',str(username))
-            local_credentials.set_password('minervalcient_password','minerva',str(password))
-            return True
-        except Exception as e:
-            if verbose: sys.stderr.write(e+'\n')
-            return False
+    # def set_email_credentials(self, username="",password="", verbose=None):
+    #     """Sets the values for the username and password (from mcgill email)
+    #     """
+    #     if verbose is None: verbose = self.show_err
+    #     self.username = username
+    #     self.password = password
+    #     try:
+    #         local_credentials.set_password('minervaclient_username','minerva',str(username))
+    #         local_credentials.set_password('minervalcient_password','minerva',str(password))
+    #         return True
+    #     except Exception as e:
+    #         if verbose: sys.stderr.write(e+'\n')
+    #         return False
     def set_minerva_credentials(self, sid="",pin="", verbose=None):
         """Sets the values for the sid and pin (for minerva only)
         """
@@ -200,19 +201,19 @@ class MinervaCommon(object):
         except Exception as e:
             if verbose: sys.stderr.write(e+'\n')
             return False
-    def load_email_credentials(self):
-        """Retrieves the computer stored values for the username and password 
-        (from mcgill email)"""
-        username = local_credentials.get_password('minervaclient_username','minerva')
-        password = local_credentials.get_password('minervalcient_password','minerva')
-        if (username is not None and password is not None):
-            self.username = username
-            self.password = password
-            return True
-        else: # When there are no stored credentials?
-            self.username = ""
-            self.password = ""
-            return False
+    # def load_email_credentials(self):
+    #     """Retrieves the computer stored values for the username and password 
+    #     (from mcgill email)"""
+    #     username = local_credentials.get_password('minervaclient_username','minerva')
+    #     password = local_credentials.get_password('minervalcient_password','minerva')
+    #     if (username is not None and password is not None):
+    #         self.username = username
+    #         self.password = password
+    #         return True
+    #     else: # When there are no stored credentials?
+    #         self.username = ""
+    #         self.password = ""
+    #         return False
     def load_sid_credentials(self):
         """Retrieves the computer stored values for the sid and pin 
         (for minerva only)"""
@@ -250,8 +251,8 @@ class MinervaCommon(object):
             # print "Minerva user is already logged out"
             if verbose: sys.stderr.write("Minerva credentials do not exist.\n")
             return False
-    def verify_sid_credentials(self, verbose=None):
-        """Verifies that the instance values for sid and pin are valid values
+    def verify_sid_credentials(self, sid, pin, verbose=None):
+        """Verifies that the values for sid and pin are valid values
 
         for the pin:
         Exactly 6 characters
@@ -261,10 +262,10 @@ class MinervaCommon(object):
         
         """
         if verbose is None: verbose = self.show_err
-        bad_sid = not str(self.sid).isdigit() or len(str(self.sid)) != 9
-        bad_pin = len(self.pin) != 6 or not (self.pin.islower() and self.pin.isalnum())
-        for char in self.pin: # no character repeatedt least athrice
-            if self.pin.count(char) >= 3:
+        bad_sid = not str(sid).isdigit() or len(str(sid)) != 9
+        bad_pin = len(pin) != 6 or not (pin.islower() and pin.isalnum())
+        for char in pin: # no character repeatedt least athrice
+            if pin.count(char) >= 3:
                 bad_pin = False
         if verbose:
             if bad_sid and bad_pin:
@@ -274,34 +275,34 @@ class MinervaCommon(object):
             if bad_pin:    
                 sys.stderr.write('PIN must be 6 characters long\n')
         return not bad_sid and not bad_pin
-    def verify_email_credentials(self, verbose=None):
+    def verify_email_credentials(self,username, password verbose=None):
         """Verifies that the instance values for username (mcgill email) and 
         password are valid values
         """
         if verbose is None: verbose = self.show_err
-        bad_username = not re.match(r'[\w]+\.[\w\.]+@(mail\.mcgill|mcgill)\.ca',self.username)
-        good_password = len(self.password) >= 8 and len(self.password) <= 18 and (' ' not in self.password)
+        bad_username = not re.match(r'[\w]+\.[\w\.]+@(mail\.mcgill|mcgill)\.ca',username)
+        good_password = len(password) >= 8 and len(password) <= 18 and (' ' not in password)
         bad_password = not good_password # this is the most terrible thing I've ever done but it's verbose
 
-        for char in self.password: # no character repeated at least thrice
-            if self.password.count(char) >= 3:
+        for char in password: # no character repeated at least thrice
+            if password.count(char) >= 3:
                 bad_password = False
         if bad_username and bad_password and verbose:
             sys.stderr.write('Email must be a valid McGill Email, and a valid McGill Password\n')
         return not bad_username and not bad_password
 
-    def initial_login(self, sid="", pin="", username="", password="", inConsole=False, reLogin=False, temporary=False, verbose=None):
+    def initial_login(self, sid="", pin="", inConsole=False, reLogin=False, temporary=False, verbose=None):
         """A single method to handle setting the initial values for the sid and 
         pin, maybe based on computer stored values, given parameters, or 
         user input. Always resets the values if given invalid credentials
-        Scenario 1: initial_login() -> loads both sid and email credentials. prefers sid. prefers to set to minerva based
+        Scenario 1: initial_login() -> loads sid and pin credentials
         Scenario 2: initial_login(sid="...",pin="...") -> sets sid and pin or username and password. prefers sid. prefers to set minerva based
         Scenario 3: initial_login(inConsole=True) -> Does prompts to determine preferred login method and set the credentials.  Prompts first to change existing credentials.
         Scenario 4: initial_login(sid='...',inConsole=True) -> prompts to determine preferred login method and set remaining credentials. Does not prompt to change credentials.
         """
         if verbose is None: verbose = self.show_err
-        temp_username = self.username
-        temp_password = self.password
+        # temp_username = self.username
+        # temp_password = self.password
         temp_sid = self.sid
         temp_pin = self.pin
 
