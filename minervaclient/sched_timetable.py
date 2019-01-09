@@ -1,12 +1,13 @@
+# sched_timetable.py: Generate a HTML timetable from course schedule structures
+# This file is from Minervac, a command-line client for Minerva
+# <http://npaun.ca/projects/minervac>
+# (C) Copyright 2016-2017 Nicholas Paun
+
 from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import unicode_literals
 from past.utils import old_div # TODO: why past.utils shows error on pylinter (py3)
-# sched_timetable.py: Generate a HTML timetable from course schedule structures
-# This file is from Minervac, a command-line client for Minerva
-# <http://npaun.ca/projects/minervac>
-# (C) Copyright 2016-2017 Nicholas Paun
 
 import pkgutil
 from . import config, sched_parse

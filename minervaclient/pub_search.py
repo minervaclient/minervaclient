@@ -1,14 +1,15 @@
+# pub_search.py: Search for available places in requested courses (via the Display Dynamic Schedule interface)
+# This file is from Minervac, a command-line client for Minerva
+# <http://npaun.ca/projects/minervac>
+# (C) Copyright 2016-2017 Nicholas Paun
+# (C) Copyright 2018-2019 Ryan B Au
+
 from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import unicode_literals
 from future import standard_library # TODO: why future import standard_library shows error on pylinter (py3)
 standard_library.install_aliases()
 from builtins import str
-# pub_search.py: Search for available places in requested courses (via the Display Dynamic Schedule interface)
-# This file is from Minervac, a command-line client for Minerva
-# <http://npaun.ca/projects/minervac>
-# (C) Copyright 2016-2017 Nicholas Paun
-# (C) Copyright 2018-2019 Ryan B Au
 
 import requests,urllib.request,urllib.parse,urllib.error,io,csv,sys
 from .minerva_common import *

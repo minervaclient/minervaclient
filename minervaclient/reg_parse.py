@@ -1,28 +1,22 @@
+# reg_parse.py: Interpret results and errors from the Quick Add/Drop interface
+# This file is from Minervac, a command-line client for Minerva
+# <http://npaun.ca/projects/minervac>
+# (C) Copyright 2016-2017 Nicholas Paun
+
 from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import unicode_literals
 from future import standard_library # TODO: why future import standard_library shows error on pylinter (py3)
 standard_library.install_aliases()
 from builtins import str
-# reg_parse.py: Interpret results and errors from the Quick Add/Drop interface
-# This file is from Minervac, a command-line client for Minerva
-# <http://npaun.ca/projects/minervac>
-# (C) Copyright 2016-2017 Nicholas Paun
 
-from bs4 import BeautifulSoup
 import urllib.request, urllib.parse, urllib.error
 import sys
 import codecs
 from .minerva_common import *
 
-html_parser = 'html5lib'
-try:
-    import html5lib
-except ImportError:
-    html_parser = 'html.parser'
-
 def quick_add_insert(text,crns):
-    html = BeautifulSoup(text, html_parser)
+    html = minerva_parser(text)
     forms = html.body.find_all('form')
 
     reg = forms[1]
@@ -57,7 +51,7 @@ def quick_add_insert(text,crns):
     return urllib.parse.urlencode(request)
 
 def quick_add_status(text):
-    html = BeautifulSoup(text, html_parser)
+    html = minerva_parser(text)
     errtable = html.body.find('table',{'summary':'This layout table is used to present Registration Errors.'})
     if errtable is not None:
         error = errtable.findAll('td',{'class': "dddefault"})[0].a.text
@@ -79,7 +73,7 @@ def quick_add_issue(message):
 
 
 def quick_add_wait(text):
-    html = BeautifulSoup(text, html_parser)
+    html = minerva_parser(text)
     forms = html.body.find_all('form')
     try:
         reg = forms[1]

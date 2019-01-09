@@ -1,28 +1,18 @@
-from __future__ import print_function
-from __future__ import absolute_import
-from __future__ import unicode_literals
-from builtins import zip
 # transcript_parse.py: Parse unofficial transcripts into an internal representation
 # This file is from Minervac, a command-line client for Minerva
 # <http://npaun.ca/projects/minervac>
 # (C) Copyright 2016-2017 Nicholas Paun
 
-from bs4 import BeautifulSoup
+from __future__ import print_function
+from __future__ import absolute_import
+from __future__ import unicode_literals
+from builtins import zip
+
 from .minerva_common import *
 import sys
 import re
 from . import config
 from . import sched_parse
-
-html_parser = 'html5lib'
-try:
-    import html5lib
-except ImportError:
-    try:
-        import lxml
-        html_parser  = 'lxml'
-    except ImportError:
-        html_parser = 'html.parser'
 
 def parse_record(cells):
     fields = ['status','course','section','title','credits','unknown','grade','remarks','unknown2','credits_earned','class_avg']
@@ -139,9 +129,7 @@ def parse_student_block(table):
 def parse_transcript(text):
     text = text.replace("&nbsp;"," ").replace("<BR>","\n")
 
-    html = BeautifulSoup(text, html_parser)
-    if html_parser=='html.parser' or html_parser=='lxml':
-        print("Transcript feature may work improperly without html5lib.") # special considerations for html.parser issues
+    html = minerva_parser(text)
 
     transcript = {}
     term = None

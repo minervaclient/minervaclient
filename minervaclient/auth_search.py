@@ -1,16 +1,18 @@
-from __future__ import absolute_import
-from __future__ import unicode_literals
-from __future__ import print_function
-from future import standard_library # TODO: why future import standard_library shows error on pylinter (py3)
-standard_library.install_aliases()
 # auth_search.py: Search for available places in requested courses (via the Minerva interface)
 # This file is from Minervac, a command-line client for Minerva
 # <http://npaun.ca/projects/minervac>
 # (C) Copyright 2016-2017 Nicholas Paun
 
+from __future__ import absolute_import
+from __future__ import unicode_literals
+from __future__ import print_function
+from future import standard_library # TODO: why future import standard_library shows error on pylinter (py3)
+standard_library.install_aliases()
+
 import urllib.request, urllib.parse, urllib.error, sys
 from . import auth_search_parse
 from .minerva_common import *
+
 
 def make_course_request(term,subjects):
     """Perform a request to the minerva site, no context included."""

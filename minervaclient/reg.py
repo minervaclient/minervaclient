@@ -1,19 +1,19 @@
+# reg.py: Enrol in registrable courses, via the Quick Add/Drop interface
+# This file is from Minervac, a command-line client for Minerva
+# <http://npaun.ca/projects/minervac>
+# (C) Copyright 2016-2017 Nicholas Paun
+
 from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import unicode_literals
 from future import standard_library
 standard_library.install_aliases()
 from builtins import str
-# reg.py: Enrol in registrable courses, via the Quick Add/Drop interface
-# This file is from Minervac, a command-line client for Minerva
-# <http://npaun.ca/projects/minervac>
-# (C) Copyright 2016-2017 Nicholas Paun
 
 import requests
 import urllib.request, urllib.parse, urllib.error
 import sys
 
-#################
 from . import reg_parse,auth_search,pub_search
 from .minerva_common import *
 

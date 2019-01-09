@@ -1,3 +1,8 @@
+# minerva_common.py: Common functions and definitions for working with Minerva
+# This file is from Minervac, a command-line client for Minerva
+# <http://npaun.ca/projects/minervac>
+# (C) Copyright 2016-2017 Nicholas Paun
+
 from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import unicode_literals
@@ -5,22 +10,31 @@ from builtins import str
 from builtins import input
 from builtins import range
 from builtins import object
-# minerva_common.py: Common functions and definitions for working with Minerva
-# This file is from Minervac, a command-line client for Minerva
-# <http://npaun.ca/projects/minervac>
-# (C) Copyright 2016-2017 Nicholas Paun
 
 from . import config
 import requests,sys
+import re
 import datetime
 import getpass
 from datetime import datetime as dt
+from bs4 import BeautifulSoup
 
 SID=""
 PIN=""
 cookie_data = {}
 referer = ""
 s = requests.Session()
+
+
+try:
+    import html5lib
+    parser = 'html5lib'
+except ImportError:
+    parser = 'html.parser'
+    print("""
+Warning: Falling back to html.parser; some commands may fail. Installing html5lib is recommended:
+    $ pip install html5lib
+""")    
 
 def minerva_get(func):
     """A GET request to minerva that accepts a string: the GET request arguments.
@@ -186,38 +200,54 @@ class MinervaError(object):
 class OutputType(object):
     json,csv,pretty = list(range(3))
 
+
+term_regex =  """
+^(
+        (
+            (?P<tf_session>F(all)?|W(inter)?|S(ummer)?)
+            -?(?P<tf_sup1>Sup(plementary)?)?
+            -?(?P<tf_year>\d{2,4})
+            -?(?P<tf_sup2>Sup(plementary)?)?
+        )|(
+            (?P<yf_year>\d{2,4})
+            -?(?P<yf_session>F(all)?|W(inter)?|S(ummer)?)
+            -?(?P<yf_sup>Sup(plementary)?)?
+        )
+    )$
+"""
+term_regex = re.compile(term_regex, re.I | re.X)
+
 def get_term_code(term):
     """Converts different variations of term codes into the yyyymm format for HTTP requests
     
     acceptable codes include:  FALL09, 2016-FALL, SUMMER-2017, 2016SUMMER, 2017-WINTER, 201809, 201701
-    """
-    if len(term) < 6: # in case term too small to cut
+ """
+
+    session_codes = {'F': ('09','10'), 'W': ('01','02'), 'S': ('05','06')}
+
+    if term == "PREVIOUSEDUCATION": # Hack to support transcript display
+        return "000000" # Sort first on transcript
+    elif len(term) == 6 and term.isdigit():
+        # A raw Minerva term code (e.g. 201810). No validation of parts
         return term
 
-    part_codes = {'FALL': '09', 'FALL-SUP': '10', 'WINTER': '01', 'WINTER-SUP': '02', 'SUMMER': '05', 'SUMMER-SUP': '06'}
-    if term == "PREVIOUSEDUCATION":
-        return '000000' # Sort first
-    elif term.isdigit(): # Term code 201809...
-        return term
-    elif term[0].isdigit(): #Year first, 2016-FALL, 2016SUMMER
-        year = term[0:4]  # First four digits
-        if term[4] == '-': # get season after dash (if exists)
-            part = term[5:] 
-        else:
-            part = term[4:]
-        part = part_codes[part.upper()] # convert season to number
-
+    match = term_regex.match(term)
+    if match is None:
+        raise ValueError("%s is not a valid Minerva term code" % (term))
+    if match.group('tf_session') is not None:
+        year,session = match.group('tf_year', 'tf_session')
+        supplementary = match.group('tf_sup1') or match.group('tf_sup2')
+    elif match.group('yf_session') is not None:
+        year,session = match.group('yf_year', 'yf_session')
+        supplementary = match.group('yf_sup')
     else:
-        year = term[-4:]
-        if term[-5] == '-':
-            part = term[:-5]
-        else:
-            part = term[:-4]
-        
-        part = part_codes[part.upper()]
-
-    return year + part
-
+        raise ValueError("%s is not a valid Minerva term code" % (term))
+    
+    year = "20" + year[-2:] # e.g. 2019 or just 19
+    session = session[0].upper() # e.g. FALL or just F
+    supplementary = bool(supplementary)
+    return year + session_codes[session][supplementary] # yyyymm format
+ 
 def get_status_code(status,short = False):
     """Converts status code phrase to a simplified code if it isn't already simplified.
     Examples: 'Registered' => 'R' or 'Web Drop' => 'DROP'
@@ -460,6 +490,10 @@ def get_bldg_name(code):
         return buildings[code]['name']
     else:
         return code #If we don't know, just stick with what we have
+
+def minerva_parser(text):
+    return BeautifulSoup(text,parser)
+    
 
 class MinervaOutput(object):
     output_string = ""
