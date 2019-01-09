@@ -1,8 +1,12 @@
+# mercury_search.py: Retrieves Mercury course evaluation results
+# This file is from Minervac, a command-line client for Minerva
+# <http://npaun.ca/projects/minervac>
+# (C) Copyright 2018-2019 Ryan B Au
+
 from __future__ import print_function
 from __future__ import unicode_literals
 from builtins import str
 import requests
-from bs4 import BeautifulSoup
 import time
 
 from minervaclient import pub_search
@@ -19,7 +23,7 @@ def minerva_page_content_get(minerva_link):
 
 def mercury_listitem_extract(content):
     """Takes the important data from the content of a webpage that lists mercury evaluation reports"""
-    soup = BeautifulSoup(content,'html.parser')
+    soup = minerva_parser(content)
     courses = soup.select('table#results_table tr')[1:]
     info_list = []
     for course in courses:
@@ -38,7 +42,7 @@ def mercury_listitem_extract(content):
 
 def mercury_report_extract(content):
     """Takes the important data from the content of a webpage for a specific mercury evaluation report"""
-    soup = BeautifulSoup(content,'html.parser')
+    soup = minerva_common(content)
     question_tables = soup.select('table.cemainborder')
     
     report_title = soup.select('table h3')[0].text.strip(' -')

@@ -1,3 +1,8 @@
+# sched_parse.py: Parse course schedule from Minerva into a dict representation
+# This file is from Minervac, a command-line client for Minerva
+# <http://npaun.ca/projects/minervac>
+# (C) Copyright 2016-2017 Nicholas Paun
+
 from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import unicode_literals
@@ -6,26 +11,15 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import zip
 from builtins import str
-# sched_parse.py: Parse course schedule from Minerva into a dict representation
-# This file is from Minervac, a command-line client for Minerva
-# <http://npaun.ca/projects/minervac>
-# (C) Copyright 2016-2017 Nicholas Paun
 
 from functools import cmp_to_key
-from bs4 import BeautifulSoup
 from datetime import datetime as dt
 from .minerva_common import *
 from . import config
 import sys,urllib.request,urllib.parse,urllib.error,re
 
-html_parser = 'html5lib'
-try:
-    import html5lib
-except ImportError:
-    html_parser  = 'html.parser'
-
 def parse_schedule(text,separate_wait = True):
-    html = BeautifulSoup(text, html_parser)
+    html = minerva_parser(text)
     tbls_course = html.body.find_all('table',{'summary': 'This layout table is used to present the schedule course detail'})
     tbls_sched = html.body.find_all('table',{'summary': 'This table lists the scheduled meeting times and assigned instructors for this class..'})
 

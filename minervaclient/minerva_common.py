@@ -1,3 +1,8 @@
+# minerva_common.py: Common functions and definitions for working with Minerva
+# This file is from Minervac, a command-line client for Minerva
+# <http://npaun.ca/projects/minervac>
+# (C) Copyright 2016-2017 Nicholas Paun
+
 from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import unicode_literals
@@ -5,22 +10,27 @@ from builtins import str
 from builtins import input
 from builtins import range
 from builtins import object
-# minerva_common.py: Common functions and definitions for working with Minerva
-# This file is from Minervac, a command-line client for Minerva
-# <http://npaun.ca/projects/minervac>
-# (C) Copyright 2016-2017 Nicholas Paun
 
 from . import config
 import requests,sys
 import datetime
 import getpass
 from datetime import datetime as dt
+from bs4 import BeautifulSoup
 
 SID=""
 PIN=""
 cookie_data = {}
 referer = ""
 s = requests.Session()
+
+
+try:
+    import html5lib
+    parser = 'html5lib'
+except ImportError:
+    parser = 'html.parser'
+    
 
 def minerva_get(func):
     """A GET request to minerva that accepts a string: the GET request arguments.
@@ -206,14 +216,15 @@ def get_term_code(term):
         else:
             part = term[4:]
         part = part_codes[part.upper()] # convert season to number
-
+        print(part,"YR first")
     else:
         year = term[-4:]
         if term[-5] == '-':
             part = term[:-5]
         else:
             part = term[:-4]
-        
+       
+        print(part,"Trmfirst")
         part = part_codes[part.upper()]
 
     return year + part
@@ -460,6 +471,10 @@ def get_bldg_name(code):
         return buildings[code]['name']
     else:
         return code #If we don't know, just stick with what we have
+
+def minerva_parser(text):
+    return BeautifulSoup(text,parser)
+    
 
 class MinervaOutput(object):
     output_string = ""

@@ -1,10 +1,11 @@
-from __future__ import print_function
-from __future__ import absolute_import
-from __future__ import unicode_literals
 # exams_ics.py: Export final exam schedule to vCalendar format
 # This file is from Minervac, a command-line client for Minerva
 # <http://npaun.ca/projects/minervac>
 # (C) Copyright 2016-2017 Nicholas Paun
+
+from __future__ import print_function
+from __future__ import absolute_import
+from __future__ import unicode_literals
 
 from . import sched_parse,sched_ics,exams_parse,config
 from datetime import datetime as dt

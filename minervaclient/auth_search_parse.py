@@ -1,12 +1,13 @@
-from __future__ import absolute_import
-from __future__ import unicode_literals
-from builtins import zip
 # auth_search_parse.py: Parse course search results to determine CRNs and availability (via the Minerva interface)
 # This file is from Minervac, a command-line client for Minerva
 # <http://npaun.ca/projects/minervac>
 # (C) Copyright 2016-2017 Nicholas Paun
+
+from __future__ import absolute_import
+from __future__ import unicode_literals
+from builtins import zip
+
 from .minerva_common import *
-from bs4 import BeautifulSoup
 
 def parse_entry(cells):
 
@@ -70,7 +71,7 @@ def determine_state(record):
 
 def search_parse(text):
     text = text.replace('&nbsp;',' ') # This is really dumb, but I don't want know how Python handles Unicode
-    html = BeautifulSoup(text,'html5lib')
+    html = minerva_parser(text)
     table = html.body.find('table',{'summary':'This layout table is used to present the sections found'})
     tr = table.findAll('tr')[2:]
     records = {}

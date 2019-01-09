@@ -1,9 +1,10 @@
-from __future__ import absolute_import
-from __future__ import unicode_literals
 # exams.py: Handler for requests for final exam schedules
 # This file is from Minervac, a command-line client for Minerva
 # <http://npaun.ca/projects/minervac>
 # (C) Copyright 2016-2017 Nicholas Paun
+
+from __future__ import absolute_import
+from __future__ import unicode_literals
 
 import requests
 from .minerva_common import *

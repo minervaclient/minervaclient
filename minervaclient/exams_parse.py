@@ -1,10 +1,11 @@
-from __future__ import print_function
-from __future__ import absolute_import
-from __future__ import unicode_literals
 # exams_parse.py: Parse transcript to find courses, look up your exam time from the dataset
 # This file is from Minervac, a command-line client for Minerva
 # <http://npaun.ca/projects/minervac>
 # (C) Copyright 2016-2017 Nicholas Paun
+
+from __future__ import print_function
+from __future__ import absolute_import
+from __future__ import unicode_literals
 
 import requests,sys
 from .minerva_common import *

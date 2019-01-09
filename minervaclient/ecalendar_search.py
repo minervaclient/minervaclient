@@ -1,8 +1,12 @@
+# ecalendar_search.py: Retrieve information about course descriptions and requirements from the eCalendar
+# This file is from Minervac, a command-line client for Minerva
+# <http://npaun.ca/projects/minervac>
+# (C) Copyright 2018-2019 Ryan B Au
+
 from __future__ import print_function
 from __future__ import unicode_literals
 from builtins import str
 import requests
-from bs4 import BeautifulSoup
 import time
 import re
 
@@ -92,7 +96,7 @@ def ecalendar_get(term_year, course_code, debug=False):
         raise Exception('Could not connect')
 
     content = page.content
-    soup = BeautifulSoup(content,'html.parser')
+    soup = minerva_parser(content)
     container = soup.find(id="inner-container")
 
     # Begin collecting content from webpage
