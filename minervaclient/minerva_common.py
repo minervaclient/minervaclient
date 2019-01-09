@@ -31,7 +31,10 @@ try:
     parser = 'html5lib'
 except ImportError:
     parser = 'html.parser'
-    
+    print("""
+Warning: Falling back to html.parser; some commands may fail. Installing html5lib is recommended:
+    $ pip install html5lib
+""")    
 
 def minerva_get(func):
     """A GET request to minerva that accepts a string: the GET request arguments.
