@@ -10,19 +10,21 @@ from builtins import object
 
 class MinervaClient(object):
     def __init__(self):
-        print("Hello")
+        self.mnvc = MinervaCommon()
+    def login(self, sid="", pin="", inConsole=False, reLogin=False, temporary=False, verbose=None):
+        self.mnvc.initial_login(sid=sid, pin=pin, inConsole=inConsole, reLogin=reLogin, temporary=temporary, verbose=verbose)
     @staticmethod
     def ecal_search():
-        """Retrieves courses' information from McGill's ECalendar.  """
+        """Retrieves courses' information from McGill's eCalendar.  """
         pass
     @staticmethod
-    def pub_search(parameter_list):
+    def pub_search(term,course_codes,**kwargs):
         """Retrieves information about a course from Minerva without requiring login
         credentials.  Useful for obtaining information about the course such as
         CRNs, Sections, Section Types, Intructors, Times, or Locations.  Not 
         good for retrieving realtime waitlist/seat information. use 
         MinervaClient.auth_search for retrieving up-to-date information."""
-        pass
+        return PubSearch.search(term,course_codes, **kwargs)
     def auth_search(self):
         """Retrieves information about a course from Minerva, but requiring login
         credentials.  Useful for obtaining information about the course such as
@@ -575,35 +577,236 @@ class MinervaCommon(object):
         """Encodes given text to ASCII"""
         return text.encode('ascii','ignore')
 
-import requests,urllib.request,urllib.parse,urllib.error,io,csv,sys
+import requests,urllib.request,urllib.parse,urllib.error,io,csv,sys,datetime
 
 class PubSearch(object):
     """Contains the functions used to perform a course search on Minerva"""
-    def search(parameter_list):
-        """Retrieves information on courses """
-        pass
-    def _build_request(parameter_list):
+    @staticmethod
+    def search(term,course_codes,fmt='',**kwargs):
+        """term is in the form of 201809 where 2018 is the year (2016, 2017...), and 09 is for Fall (01 for Winter, 05 for Summer)
+        course_codes is a list and elements may come in the form of:
+            general course code, like COMP-202, to retrieve all different sections of it (eg. COMP-202-001, COMP-202-002...)
+                AND/OR
+            a specific course code with its section number, can be given (eg. COMP-202-001)
+        valid course_type values include Lecture, Tutorial, or any other similar type
+        
+        TODO: waitlist, availability, tutorials/lectures, 
+
+        This returns a tuple of the relevant course codes (eg. COMP-200-001 CCOM-206-018 ...) and the courses object retrieved from Minerva
+        the courses object contains all of the courses with the same subject (eg. COMP, ECSE, POLI) in a dictionary 
+        with keys in the form of course codes
+        Input: ('201809', ['COMP-200', 'CCOM-206-018'])
+        Example: (['COMP-200-001', 'COMP-200-002', 'COMP-200-003', 'CCOM-206-018'], {all courses' data})
+        {all courses' data}['COMP-200-002'] => {just the info for COMP-200-002}
+        """
+        courses_obj = PubSearch._post_search(term,course_codes)
+        full_codes = []
+        
+        # This used to be a bunch of for loops, but it's fine as a giant single line :D
+        full_codes = { course:courses_obj[course] for course in courses_obj if (not all( [ (code.upper() not in course) for code in course_codes ] )) }
+        filtered_codes = {}
+        if kwargs:
+            for course in full_codes:
+                for key in kwargs:
+                    if key.lower() in full_codes[course] and (str(kwargs[key]).upper() in str(full_codes[course][key]).upper()):
+                        filtered_codes[course] = full_codes[course]
+        else:
+            filtered_codes = full_codes
+
+        if fmt == 'json':
+            return json.dumps(filtered_codes)
+        elif fmt == 'text':
+            return PubSearch._beautify_courses(filtered_codes)
+        elif fmt == 'dictionary':
+            return filtered_codes # return the data retrieved from Minerva for the codes given as arguments
+        elif fmt == 'calendar':
+            return PubSearch._calendrify_courses(filtered_codes)
+        else:
+            return filtered_codes # return the data retrieved from Minerva for the codes given as arguments
+    @staticmethod
+    def _beautify_courses(course_codes):
+        """When given an object of courses' info, returns a formatted string version of the information."""
+        result = ""
+        for course, e in course_codes.items():
+            result += "{0} CRN: {1} | {2} \n".format(e['_code'], e['crn'], e['title'])
+            result += "{0} Instructor: {1} | Credits: {2}\n".format(e['type'], e['instructor'], e['credits'])
+            result += "Capacity: {0} | Seats(remain): {1}/{0} | Waitlist(remains): {2}/{3}\n".format(e['cap'],e['wait']['rem'],e['wl_rem'],e['wl_cap'])
+            result += "Seats(actual): {0}/{1} | Waitlist(actual): {2}/{3}\n".format(e['wait']['act'],e['cap'],e['wl_act'],e['wl_cap'])
+            result += "{} {} {} | Period: {}\n\n".format(e['location'],e['days'],e['time'],e['date'])
+        return result
+    @staticmethod
+    def _calendrify_courses(course_codes):
+        def simplify_course(course):
+            return [
+                course['_code'],
+                course['title'],
+                'crn: '+course['crn'],
+                course['location'],
+                course['time'],
+                course['days'],
+            ]
+        def get_first_time(simple_course):
+            return datetime.datetime.strptime(simple_course[-2][:8], '%I:%M %p')
+        def pack_course(simple_course):
+            pass
+        # height = 100
+        # width = 100
+        # result = [[['',0,0] for y in range(height)] for x in range(width)] # [x][y][char, index, priority]
+        days = 'MTWRF'
+        u_list = [simplify_course(course_codes[course]) for course in course_codes]
+        u_list.sort(key=get_first_time)
+        o_list = [[],[],[],[],[]]
+
+        max_col_len = 0
+        for course in u_list:
+            for day in course[-1]: # days
+                o_list[days.find(day)].append(course)
+                if len(o_list[days.find(day)]) >= max_col_len:
+                    max_col_len = len(o_list[days.find(day)])
+        result = ""
+        row_format = '|'+('{:<17.17}|'*5)+'\n'
+        break_format = '+'+ '{:<17.17}+'.format("-"*17)*5 + '\n'
+        
+        # The days header
+        result+= break_format
+        result+= row_format.format(*days)
+        result+= break_format
+
+        for row in range(max_col_len):
+            for i in range(5):
+                data_pts = [ "" if len(o_list[col])<=row else o_list[col][row][i] for col in range(5)]
+                result+=row_format.format(*data_pts)
+            result+= break_format
+        return result
+    @staticmethod
+    def _build_request(term,subj_codes):
         """Helper function that builds the POST request that would pull 
         relevant course information from Minerva. Based on the given 
-        term code (201809) and course codes (COMP-202 or COMP-202-000 
-        or just COMP)
+        term code (201809) and course subject codes (COMP-202 or COMP-202-000 
+        or just COMP).  Collects entire subject from Minerva (as up to date as VSB)
             Example: build_request('201809', ['COMP-202', 'FRSL'])
         """
-        pass
-    def _post_search(parameter_list):
+        
+        term = MinervaCommon.get_term_code(term)
+        req = [
+        ('sel_crse',''),
+        ('sel_title',''),
+        ('begin_hh','0'),
+        ('begin_mi','0'),
+        ('begin_ap','a'),
+        ('end_hh','0'),
+        ('end_mi','0'),
+        ('end_ap','a'),
+        ('sel_dunt_code',''),
+        ('sel_dunt_unit',''),
+        ('sel_from_cred',''),
+        ('sel_to_cred',''),
+        ('sel_coll',''),
+        ('call_value_in','UNSECURED'),
+        ('display_mode_in','LIST'),
+        ('search_mode_in',''),
+        ('term_in',term),
+        ('sel_subj','dummy'),
+        ('sel_day','dummy'),
+        ('sel_ptrm','dummy'),
+        ('sel_ptrm','%'),
+        ('sel_camp','dummy'),
+        ('sel_schd','dummy'),
+        ('sel_schd','%'),
+        ('sel_sess','dummy'),
+        ('sel_instr','dummy'),
+        ('sel_instr','%'),
+        ('sel_attr','dummy'),
+        ('sel_attr','%'),
+        ('crn','dummy'),
+        ('rsts','dummy'),
+        ('sel_levl','dummy'),
+        ('sel_levl','%'),
+        ('sel_insm','dummy'),
+        ]
+
+        for code in subj_codes:
+            req.append(('sel_subj',code.split("-")[0].upper()))
+        
+        return urllib.parse.urlencode(req)
+    @staticmethod
+    def _post_search(term,course_codes):
         """ Helper function that performs the POST request to retrieve 
         the data and returns a logical python dictionary based on the request"""
-        pass
-    def _parse_search(parameter_list):
+        request = PubSearch._build_request(term,course_codes)
+        sys.stderr.write("> bwckgens.csv\n") # TODO: should remove this line?
+        result = requests.post("https://horizon.mcgill.ca/rm-PBAN1/bwckgens.csv",request)
+        return PubSearch._parse_search(result.text)
+    @staticmethod
+    def _parse_search(text):
         """ Converts the HTTP request data from Minerva into a logical 
         format in a python dictionary.
         """
         # stream = io.StringIO(text.encode('ascii','ignore'))
         # print(type(text))
-        pass
-    
+        if type(text) == type(u''):
+            text = text.encode('ascii','ignore')
+            text = text.decode('utf-8','strict')
+        elif type(text) == str:
+            pass
+        stream = io.StringIO(text)
+        field_names = ['crn','subject','course','section','type','credits','title','days','time','cap','wl_cap','wl_act','wl_rem','instructor','date','location','status']
+        file = csv.DictReader(stream,field_names)
+
+        records = {}
+        first = True
+        for row in file:
+            if row['subject'] is None or row['subject'] == 'Subject':
+                continue
+
+            if row['cap'] == '':
+                continue
+
+            if row['wl_rem'] == '':
+                row['wl_rem'] = -1000
+
+            row['_code'] = "-".join([row['subject'],row['course'],row['section']])
+            row['select'] = MinervaState.only_waitlist_known
+
+            row['reg'] = {}
+            row['reg']['cap'] = int(row['cap'])
+            
+            row['wait'] = {}
+            row['wait']['cap'] = int(row['wl_cap'])
+            row['wait']['act'] = int(row['wl_act'])
+            row['wait']['rem'] = int(row['wl_rem'])
+
+            if row['wait']['rem'] > 0:
+                row['_state'] = MinervaState.wait
+            else:
+                row['_state'] = MinervaState.unknown
+
+            records[row['_code']] = row
+
+        
+        return record
+class ECalendarSearch(object):
+    pass
+class AuthSearch(object):
+    pass
+class MercurySearch(object):
+    pass
+class CourseRegister(object):
+    pass
+class CourseSchedule(object):
+    pass
+class CourseTranscript(object):
+    pass
+import json
 if __name__ == '__main__':
-    mnvc = MinervaCommon()
+    mnvc = MinervaClient()
+    obj = mnvc.pub_search('201901',['ECSE-205-001','ECSE-205-002','ECSE-223-001','ECSE-223-003','COMP-302-001','ECON-209-003','URBP-201-001','URBP-201-004','COMP-273-001'],fmt='calendar')
+    text = json.dumps(obj)
+    # for col in obj:
+    #     for e in col:
+    #         print(e[0], end=' ')
+    #     print()
+    print(obj)
     # <--Testing the MinervaCommon.initial_login-->
     # mnvc.initial_login(sid="260822502",inConsole=True,temporary=True)
     # mnvc._minerva_login_request()
