@@ -4,6 +4,8 @@
 # (C) Copyright 2016-2017 Nicholas Paun
 from __future__ import unicode_literals
 #### Datasets
+banner_url = 'https://horizon.mcgill.ca/pban1/'
+
 data_source = ['http://cs.mcgill.ca/~npaun/mnvc-data/'] # Where should common datasets be downloaded from? There is only one option for now.
 
 

@@ -10,5 +10,6 @@ state.dat
 *.out
 *.egg-info
 *.bak
+shib_credentials.py
 build/
 dist/

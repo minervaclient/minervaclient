@@ -36,7 +36,7 @@ Warning: Falling back to html.parser; some commands may fail. Installing html5li
     $ pip install html5lib
 """)    
 
-def minerva_get(func):
+def minerva_get(func, base_url = config.banner_url):
     """A GET request to minerva that accepts a string: the GET request arguments.
     
     """
@@ -44,12 +44,13 @@ def minerva_get(func):
         sys.stderr.write("? " + func + "\n")
 
     global referer
-    url = "https://horizon.mcgill.ca/pban1/" + func
+    url = base_url + func
     r = s.get(url,cookies = cookie_data, headers={'Referer': referer})
-    referer = url
+    referer = r.url
     return r
 
-def minerva_post(func,req):
+
+def minerva_post(func,req, base_url = config.banner_url):
     """A POST request to minerva that accepts a string for URL arguments and the data for the POST request.
     
     """
@@ -57,9 +58,10 @@ def minerva_post(func,req):
         sys.stderr.write("> " + func + "\n")
 
     global referer
-    url = "https://horizon.mcgill.ca/pban1/" + func
-    r = s.post(url,data = req,cookies = cookie_data,headers = {'Referer': referer})
-    referer = url
+    print(cookie_data)
+    url = base_url + func
+    r = s.post(url,data = req,cookies = cookie_data,headers = {'Referer': referer, 'Content-Type': 'application/x-www-form-urlencoded'})
+    referer = r.url
     return r
 
 def verify_login():
