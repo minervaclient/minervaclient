@@ -1,0 +1,111 @@
+# Minervac
+### The Minerva Client
+
+`minervac` is a CLI client for Minerva's course registration facilities. Currently, the program can display your current course schedule, final exam schedule, or transcript, and register for courses by CRN or course code. Course schedules can be formatted with custom reports, conflicts are detected, and HTML timetables, as well as importable calendar files, can be produced. Previously registered courses are recorded and `minervac` will only attempt registration for the remaining courses on each run.
+The program is implemented in Python and currently is very hacky. Pull requests welcome. If you have ideas for features or have found a bug, please open an issue.
+
+![Registering for a course](http://i.imgur.com/9FciOtv.png)  
+**[More screenshots](#screenshots)**
+
+## Updates
+1. ****
+ * You can now view your final exam schedule (`mnvc sched -E`)
+2. ****
+ * You can now query your transcript (`mnvc transcript`)
+3. ****
+ * A visual timetable feature has been implemented. (-V).
+ * Calendar export is now available (vCalendar format only). (-C)
+4. ****
+ * The command-line interface won't be modified anymore, only extended. Configuration format is still in flux.
+ * Displaying course schedule information with custom reports.
+ 
+
+## See also
+
+* You could try seeing an advisor.
+* If you don't need to make changes to your registration, use `Minervabot` instead. It is probably way better: https://github.com/zafarali/minerva-bot
+* When choosing courses, you may find the `McGill Enhanced` Chrome extension useful: https://github.com/demetrios-koziris/McGillEnhanced
+
+## Goals
+
+The goals of this project are to create a simple and high-quality interface for the most-used features of Minerva. The user interface will be designed in accordance with UNIX priciples, thus, `minervac` will be easily programmable. Additionally, `minervac` will clearly explain how it is connecting to Minerva and provide a starting point for other projects that attempt to use the Minerva "API". This project is free and open-source.
+
+## Installation
+
+1. `minervac` uses the `requests`, `beautifulsoup4`, and `html5lib` modules for Python.
+	* The easiest way to install them is probably with `pip`: `sudo pip install requests beautifulsoup4 html5lib`
+2. Copy `credentials.py` to `credentials_local.py` and fill in your credentials.
+3. Edit `config.py` to setup various settings
+
+## Usage
+
+It's way simpler than actually using Minerva!
+
+* **Registration:** `mnvc reg`
+	* To register for a set of courses: `mnvc reg -t FALL2016 COMP-251-001 MATH-240-001`
+	* To register by CRN (faster): `minervac reg -t 2016-FALL 814 30302 30`
+	* To save previously-registered courses and only register for what remains: `mnvc reg -j compstuff -t 2016-FALL COMP-273-002 COMP-396-001`
+	* **NOTE:** An option to search without logging in is provided. However, only waitlist information can be determined in this way, and its quality may be poor.
+* **Scheduling:** `mnvc sched`
+	* To display your schedule: `mnvc sched -t WINTER2017`
+	* To display more details (`-l`), or less (`-s`): `mnvc sched -lt SUMMER-2017` or `minervac sched -st 2016WINTER-SUP`
+	* To use a custom report (edit `config.py`): `mnvc sched -t WINTER2017 -r magicreport`
+	* To export your timetable to a HTML file: `minervac sched -t 2016SUMMER -V > ~/summer-schedule.html`
+		* Edit `config.py` to change the way courses are formatted and `sched_timetable.css` to adjust the styling.
+		* **Hint:** Click on a building name to get directions. Hover over courses to see an explanation of the color code.
+	* To export your course schedule to an iCalendar file: `mnvc sched -Ct 2017-WINTER > mcgill-winter-2017.ics`
+		* You can also export your final exam schedule, like this: `mnvc sched -ECt FALL2016 > mcgill-fall-2016-finals.ics`.
+		* The resulting file can be imported into your favorite calendar application (Google Calendar, and the Mac OS X Calendar work.)
+		* This format may also be called ICS or vCalendar.
+	* To display your final exam schedule: `mnvc sched -t FALL2016 -E`
+* **Transcripts:** `mnvc transcript`
+	* To display your transcript: `mnvc transcript`
+	* The term argument is optional, and more than one term can be specified: `minervac transcript -t FALL2016,2017-SUMMER`
+	* Reports (`-r`) and the long (`-l`) and short (`-s`) shortcuts can be used. (See *Scheduling* above.)
+	* To display only your program information (`-S`) and GPA (`-C`): `mnvc transcript -SC`
+	* To display some miscellaneous transcript information as well (`-P`): `mnvc transcript -P`
+* For a full description of available options: `mnvc -h`
+* A few useful extra scripts are included in the `extras/` folder:
+	* **Note**: These tools are more experimental than `mnvc` itself and might not work so well.
+	* `grablrs.py`: Downloads LRS lecture recordings.
+	* `transcript-monitor.sh`: Allows you to monitor your unofficial transcript for new grades.
+
+
+## Scheduling registration
+
+* Put it in your `crontab`. This way, the `minervac` will automatically be run at the time interval you choose, and you will receive an email indicating the status of your course registration job.
+	* If you don't have `cron`, you may need to write a long-running loop or use your OS' job scheduling facility. Oh, and by the way, your OS sucks.
+* An example crontab line: `00     *       *       *       *       minervac -dj compstuff -t 2016FALL 814 20620 33`
+.  
+* Some ideas:
+	* Set the `MAILTO` option to your email address, or pipe the output to `mail`.
+	* You can receive this information as a SMS text message. Look up the email-to-SMS gateway for your cellular carrier. For example, `MAILTO=2505551234@msg.telus.com`
+
+## Further development
+
+* Displaying degree evaluation reports.
+* **Won't implement:** While it would be trivial to support dropping courses, I am worried that this may mess up people's schedules as Minerva does not perform truly atomic transactions. Furthermore, it may mess up my own schedule and so I don't want to test it. If you're braver than I am, please send me a pull request.
+* Support output formatters and more control over what this program prints.
+* Allow querying for courses from the CLI, and use a SQL database to allow for fancy queries.
+* Integrate my course selection satisfiability solver to recommend what you can register for.
+
+## WARNING
+
+1. You are solely responsible for deciding if `minervac` is compliant with McGill's policies, and if you want to assume this risk.
+    * Start reading here: [McGill Policy on the Responsible Use of IT Resources](http://www.mcgill.ca/secretariat/files/secretariat/responsible-use-of-mcgill-it-policy-on-the.pdf), but there are most definitely more policies that may be applicable to this program and its use.
+2. `minervac` might mess up your course schedule in a very bad sort of way.
+3. The final exam data might be unpleasantly wrong, as it is generated from a <s>messed up</s><ins>pretty high-quality</ins> PDF. **Progress at McGill!**
+
+4. `minervac` might suddenly stop working if Minerva is changed.
+5. Minerva is a horrible, horrible system and trying to extend this program may lead to a horrible headache.
+6. This program was badly written, in a rush, and might have some serious design flaws.
+7. May give CS hipsters a headache.
+
+
+## Applicability outside McGill
+
+Minerva is a Banner installation (Release 8.7, to be precise), so you may be able to adapt the program to work for your university or college. Try to edit `minerva_common.py` with the correct URL to your student information system. A quick way to check if you've got Banner is to Google for "bwckgens" and your institution's name.
+
+## Screenshots
+
+<a href="http://i.imgur.com/J97ekip.png"><img src="http://i.imgur.com/J97ekip.png" width="80%"></a> <a href="http://i.imgur.com/kQfGPnb.png"><img src="http://i.imgur.com/kQfGPnb.png" width="80%"></a>
