@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 #### Datasets
 banner_url = 'https://horizon.mcgill.ca/pban1/'
 
-data_source = ['http://cs.mcgill.ca/~npaun/mnvc-data/'] # Where should common datasets be downloaded from? There is only one option for now.
+data_source = ['https://raw.githubusercontent.com/minervaclient/minervaclient/master/data/'] # Where should common datasets be downloaded from? There is only one option for now.
 
 
 #### Formatting
