@@ -8,12 +8,18 @@ from builtins import input
 from builtins import range
 from builtins import object
 from builtins import bytes
-
+# SQL formatter, PDF(easy with html), HTML, CSV. Minervaclient sql shell. JSON format
+# jq, gitflow, stack exchange data explorer,
 class MinervaClient(object):
     def __init__(self):
         self.mnvc = MinervaCommon()
+        self.obj_pub_search = PubSearch()
+        self.obj_auth_search = AuthSearch(self.mnvc)
+        self.obj_register = CourseRegister(self.mnvc)
+        self.obj_transcript = CourseTranscript(self.mnvc)
+        self.obj_schedule = CourseSchedule(self.mnvc)
     def login(self, sid="", pin="", inConsole=False, reLogin=False, temporary=False, verbose=None):
-        self.mnvc.initial_login(sid=sid, pin=pin, inConsole=inConsole, reLogin=reLogin, temporary=temporary, verbose=verbose)
+        self.mnvc.login(sid=sid, pin=pin, inConsole=inConsole, reLogin=reLogin, temporary=temporary, verbose=verbose)
     @staticmethod
     def ecal_search():
         """Retrieves courses' information from McGill's eCalendar.  """
@@ -25,7 +31,7 @@ class MinervaClient(object):
         CRNs, Sections, Section Types, Intructors, Times, or Locations.  Not 
         good for retrieving realtime waitlist/seat information. use 
         MinervaClient.auth_search for retrieving up-to-date information."""
-        return PubSearch.search(term,course_codes, **kwargs)
+        return self.obj_pub_search.search(term,course_codes, **kwargs)
     def auth_search(self, term,course_codes,**kwargs):
         """Retrieves information about a course from Minerva, but requiring login
         credentials.  Useful for obtaining information about the course such as
@@ -39,15 +45,43 @@ class MinervaClient(object):
     def schedule(self):
         """Retrieves student's schedule information from Minerva."""
         raise NotImplementedError
-    def register(self):
+    def register(self, codes):
         """Attempts to register the user into a course through Minerva, given a 
         CRN or Course Code."""
-        raise NotImplementedError
+        return None
 
 class MinervaState(object):
     register,wait,closed,possible,unknown,wait_places_remaining,full,full_places_remaining,only_waitlist_known = list(range(9))
 class MinervaError(object):
     reg_ok,reg_fail,reg_wait,course_none,course_not_found,user_error,net_error,require_unsatisfiable = list(range(8))
+
+class MinervaCourse(object):
+    def __init__(self):
+        self._dict =  {
+            'select': 0, 'crn': '', 
+            'subject': '', 
+            'course': '', 
+            'section': '', 
+            'type': '', 
+            'credits': '', 
+            'title': '', 
+            'days': '', 
+            'time': '', 
+            'reg': {'cap': -1000, 'act': -1000, 'rem': -1000}, 
+            'wait': {'cap': -1000, 'act': -1000, 'rem': -1000}, 
+            'instructor': '', 
+            'date': '', 'location': '', 
+            'status': '', '_code': '', '_state': 0,
+            'cap': '-1000', 'wl_cap': '-1000', 'wl_rem': '-1000', 'wl_act': '-1000'
+            }
+    def __getitem__(self,key):
+        return self._dict[key]
+    def __setitem__(self,key,value):
+        if key in self._dict:
+            self._dict[key] = value
+        else:
+            raise KeyError
+
 
 from keyrings.cryptfile.cryptfile import CryptFileKeyring
 kr = CryptFileKeyring()
@@ -89,7 +123,7 @@ class MinervaConfig(object):
         for key, item in self.defaults_obj.items():
             self.kr.set_password('minervaclient_'+key,'minerva',item)
     def list_settings(self):
-        result = [ i for i in self.settings_obj.keys() ]
+        result = [ i for i in list(self.settings_obj.keys()) ]
         result.sort()
         return result
     
@@ -168,7 +202,7 @@ class MinervaCommon(object):
         r = self.session.post(url,data = req,cookies = self.cookie_data,headers = {'Referer': self.referer})
         self.referer = url
         return r
-    def _minerva_login_request(self):
+    def _minerva_login_request(self,temporary=False):
         """Login http request is sent for the user, utilizing the credentials stored
         for the sid and pin
         """
@@ -283,14 +317,14 @@ class MinervaCommon(object):
         if bad_username and bad_password and verbose:
             sys.stderr.write('Email must be a valid McGill Email, and a valid McGill Password\n')
         return not bad_username and not bad_password
-    def initial_login(self, sid="", pin="", inConsole=False, reLogin=False, temporary=False, verbose=None):
+    def login(self, sid="", pin="", inConsole=False, reLogin=False, temporary=False, verbose=None):
         """A single method to handle setting the initial values for the sid and 
         pin, maybe based on computer stored values, given parameters, or 
         user input. Always resets the values if given invalid credentials
-        Scenario 1: initial_login() -> loads sid and pin credentials
-        Scenario 2: initial_login(sid="...",pin="...") -> sets sid and pin and uses them
-        Scenario 3: initial_login(inConsole=True) -> Does prompt to determine preferred login method and set the credentials.  Prompts first to change existing credentials.
-        Scenario 4: initial_login(sid='...',inConsole=True) -> prompts to determine preferred login method and set remaining credentials. Does not prompt to change credentials.
+        Scenario 1: login() -> loads sid and pin credentials
+        Scenario 2: login(sid="...",pin="...") -> sets sid and pin and uses them
+        Scenario 3: login(inConsole=True) -> Does prompt to determine preferred login method and set the credentials.  Prompts first to change existing credentials.
+        Scenario 4: login(sid='...',inConsole=True) -> prompts to determine preferred login method and set remaining credentials. Does not prompt to change credentials.
         """
         if verbose is None: verbose = self.show_err
         # temp_username = self.username
@@ -351,6 +385,7 @@ class MinervaCommon(object):
             loaded_login = True
             self.is_minerva_based = True
     
+    # TODO: Separate 
     @staticmethod
     def minerva_parser(text):
         return BeautifulSoup(text,parser)
@@ -613,6 +648,7 @@ class PubSearch(object):
         Example: (['COMP-200-001', 'COMP-200-002', 'COMP-200-003', 'CCOM-206-018'], {all courses' data})
         {all courses' data}['COMP-200-002'] => {just the info for COMP-200-002}
         """
+        term = MinervaCommon.get_term_code(term)
         courses_obj = PubSearch._post_search(term,course_codes)
         full_codes = []
         
@@ -641,7 +677,7 @@ class PubSearch(object):
     def _beautify_courses(course_codes):
         """When given an object of courses' info, returns a formatted string version of the information."""
         result = ""
-        keys = course_codes.keys()
+        keys = list(course_codes.keys())
         keys.sort()
         for course in keys:
             e = course_codes[course]
@@ -655,41 +691,58 @@ class PubSearch(object):
             result += "{} {} {} | Period: {}\n\n".format(e['location'],e['days'],e['time'],e['date'])
         return result
     @staticmethod
-    def _calendrify_courses(course_codes, row_length=10):
+    def _calendrify_courses(course_codes, row_height=10, row_length=15):
         if row_length<6:
             row_length=6
+        if row_height<5:
+            row_height = 5
         def simplify_course(course):
+            # print(course) # DEBUG
+            keys = ['type','instructor','credits','date','status']
+            # u'reg', u'wait'
+            seats = 'Seats %s/%s'%('-' if 'act' not in course['reg'] else str(course['reg']['act']),course['cap']) 
+            waitlist = 'Wait %s/%s'%(course['wl_act'],course['wl_cap']) 
             return [
                 course['_code'],
+                course['time'].replace(" ",""),
+                course['days'],
                 course['title'],
                 'crn: '+course['crn'],
                 course['location'],
-                course['time'].replace(" ",""),
-                course['days'],
-            ]
+                seats,
+                waitlist,
+            ] + [str(course[key]) for key in keys]
         def get_first_time(simple_course):
-            result = datetime.datetime.strptime(simple_course[-2][:7], '%I:%M%p')
-            other = datetime.datetime.strptime(simple_course[-2][8:], '%I:%M%p')
+            # print(simple_course) # DEBUG
+            result = datetime.datetime.strptime(simple_course[1][:7], '%I:%M%p')
+            other = datetime.datetime.strptime(simple_course[1][8:], '%I:%M%p')
             if row_length<10:
-                simple_course[-2] = result.strftime('%H:%M') + '-'
+                simple_course[1] = result.strftime('%H:%M') + '-'
             elif row_length<11:
-                simple_course[-2] = result.strftime('%H:%M') + ' %2.1fh' % (((other-result).total_seconds() / 60 + 10) / 60.0)
+                simple_course[1] = result.strftime('%H:%M') + ' %2.1fh' % (((other-result).total_seconds() / 60 + 10) / 60.0)
             elif row_length<15:
-                simple_course[-2] = result.strftime('%H:%M') + '-' + other.strftime('%H:%M')
+                simple_course[1] = result.strftime('%H:%M') + '-' + other.strftime('%H:%M')
             return result
         def pack_course(simple_course):
-            pass
+            print(simple_course)
+            times = simple_course[1:3] # time and date
+            packed_course = simple_course[0:1] + simple_course[3:]
+            for item, i in zip(times,range(len(times))):
+                packed_course.insert(i+row_height-1,item)
+            print(packed_course)
+            return packed_course
         # height = 100
         # width = 100
         # result = [[['',0,0] for y in range(height)] for x in range(width)] # [x][y][char, index, priority]
         days = 'MTWRF'
         u_list = [simplify_course(course_codes[course]) for course in course_codes]
+        # print(u_list) #DEBUG
         u_list.sort(key=get_first_time)
         o_list = [[],[],[],[],[]]
 
         max_col_len = 0
         for course in u_list:
-            for day in course[-1]: # days
+            for day in course[2]: # days
                 o_list[days.find(day)].append(course)
                 if len(o_list[days.find(day)]) >= max_col_len:
                     max_col_len = len(o_list[days.find(day)])
@@ -705,8 +758,9 @@ class PubSearch(object):
         result+= break_format
 
         for row in range(max_col_len):
-            for i in range(5):
-                data_pts = [ "" if len(o_list[col])<=row else o_list[col][row][i] for col in range(5)]
+             # rearrange the order of the course row with pack_course
+            for i in range(row_height): # Adding in each element from the row
+                data_pts = [ "" if len(o_list[col])<=row else pack_course(o_list[col][row])[i] for col in range(5)]
                 result+=row_format.format(*data_pts)
             result+= break_format
         return result
@@ -819,14 +873,15 @@ class PubSearch(object):
 
         
         return records
+
 class ECalendarSearch(object):
     pass
 
 import urllib.request, urllib.parse, urllib.error, sys
 class AuthSearch(object):
     
-    def __init__(self, minervaClient):
-        self.mnvc = minervaClient
+    def __init__(self, minervaCommon):
+        self.mnvc = minervaCommon
     def search(self, term, course_codes,fmt='',**kwargs):
         """term is in the form of 201809 where 2018 is the year (2016, 2017...), and 09 is for Fall (01 for Winter, 05 for Summer)
         course_codes is a list and elements may come in the form of:
@@ -844,6 +899,7 @@ class AuthSearch(object):
         Example: (['COMP-200-001', 'COMP-200-002', 'COMP-200-003', 'CCOM-206-018'], {all courses' data})
         {all courses' data}['COMP-200-002'] => {just the info for COMP-200-002}
         """
+        term = MinervaCommon.get_term_code(term)
         courses_obj = self._post_search(term,course_codes)
         full_codes = []
         
@@ -871,7 +927,7 @@ class AuthSearch(object):
     def _beautify_courses(self,course_codes):
         """When given an object of courses' info, returns a formatted string version of the information."""
         result = ""
-        keys = course_codes.keys()
+        keys = list(course_codes.keys())
         keys.sort()
         for course in keys:
             e = course_codes[course]
@@ -939,7 +995,7 @@ class AuthSearch(object):
             subjects.append(code.split("-")[0])
             # subjects.append(code)
 
-        # initial_login()
+        # login()
         # if localsys_has_login() and DEBUG:
         #     print("Using system credenials")
         self.mnvc._minerva_login_request()
@@ -1038,20 +1094,56 @@ class AuthSearch(object):
 class MercurySearch(object):
     pass
 class CourseRegister(object):
-    pass
+    def __init__(self,mnvc):
+        self.mnvc = mnvc
+    def register(self, term, codes, job=False):
+        codes_given = self._course_ref_type(codes[0])
+        term = MinervaCommon.get_term_code(term)
+        for course in codes:
+            if codes_given != self._course_ref_type(course):
+                sys.stderr.write("\033[1;31mERROR:\033[0m Course codes cannot be combined with CRNs")
+                sys.exit(MinervaError.user_error)
+        if job:
+            courses = self._restore_state(job,codes)
+            if not courses:
+                print("\033[1;32m**** Congratulations, you've gotten into all your courses ****\033[1m",)
+                sys.exit(0)
+        else: 
+            courses = codes
+        
+        if codes_given:
+            data = None
+        else:
+            if require_all or require_reg:
+                sys.stderr.write("\033[1;31mERROR:\033[0m When using CRNs, it is not possible to verify the state of classes before attempting registration.")
+                sys.exit(MinervaError.user_error)
+
+    def _course_ref_type(self,code):
+        pass
 class CourseSchedule(object):
-    pass
+    """Retrieves the list of courses in a student's official schedule.  Calculates course conflicts automatically"""
+    def __init__(self, mnvc):
+        self.mnvc = mnvc
+    def get_sched(self):
+        pass
+    def get_schedule(self,formatter=None):
+        pass
+# Ask somebody about deferred exams
 class CourseTranscript(object):
-    pass
+    def __init__(self,mnvc):
+        self.mnvc = mnvc
+    
 import json
 if __name__ == '__main__':
     client = MinervaClient()
     client.login()
     # obj = client.pub_search('201901',['ECSE-205-001','ECSE-205-002','ECSE-223-001','ECSE-223-003','COMP-302-001','ECON-209-003','URBP-201-001','URBP-201-004','COMP-273-001'],fmt='calendar')
-    # obj = client.auth_search('201901',['ECSE-205-001','ECSE-205-002','ECSE-223-001','ECSE-223-003','COMP-302-001','ECON-209-003','URBP-201-001','URBP-201-004','COMP-273-001'],fmt='calendar')
+    # print(client.pub_search('201901',['ECSE-205-001','ECSE-205-002','COMP-302-001','ECON-209-003','URBP-201-001','URBP-201-004'],fmt='text'))
+    # obj = (client.auth_search('201901',['ECSE-205-001','ECSE-205-002','COMP-302-001','ECON-209-003','URBP-201-001','URBP-201-004']))
+    print(client.auth_search('201901',['ECSE-205-001','ECSE-205-002','COMP-302-001','ECON-209-003','URBP-201-001','URBP-201-004'],fmt='calendar'))
     # print( client.auth_search('201901',['ECSE-205-001'],fmt='calendar'))
     # print( client.auth_search('201901',['ECSE-205-001'],fmt='json'))
-    print( client.pub_search('201901',['math-133-001','math-133-004','ecse-321-001','ecse-321-002','ECSE-223-001','ECSE-223-003','COMP-273-001'],fmt='calendar'))
+    # print( client.pub_search('201901',['math-133-001','math-133-004','ecse-321-001','ecse-321-002','ECSE-223-001','ECSE-223-003','COMP-273-001'],fmt='calendar'))
     # print( client.auth_search('201901',['ECSE-205-001'],fmt='dictionary'))
     # obj1 = client.pub_search('201901',['ECSE-205-001'],fmt='dictionary')
     # text = json.dumps(obj0)
@@ -1072,10 +1164,13 @@ if __name__ == '__main__':
     # <--- End PubSearch and AuthSearch comparisons --->
     # print(client.pub_search('201901',['ECSE-205-001','ECSE-205-002','ECSE-223-001','ECSE-223-003'],fmt='json'))
     # print(client.pub_search('201901',['ECSE-205-001','ECSE-205-002'],fmt='text'))
-    # <--Testing the MinervaCommon.initial_login-->
-    # client.initial_login(sid="260822502",inConsole=True,temporary=True)
+    # <--Testing the MinervaCommon.login-->
+    # client.login(sid="260822502",inConsole=True,temporary=True)
     # client._minerva_login_request()
     # if not client._minerva_login_request():
     #     print('Login Unsuccessful')
     # else:
     #     print('Login Successful')
+    """
+    Creating a universal 
+    """
