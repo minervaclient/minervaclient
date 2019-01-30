@@ -21,15 +21,15 @@ def course_details(term,report = 'default',visual = False,calendar = False,confl
 
     minerva_output = MinervaOutput(inConsole=True)
 
-    if visual:
+    if visual: # HTML timetable creation
         minerva_output.append(sched_timetable.timetable_report(r.text,report))
-    elif calendar:
+    elif calendar: # ICS calendar import creation
         minerva_output.append(sched_ics.export_schedule(r.text,report))
-    elif conflicts_only:
+    elif conflicts_only: # Conflict Report Creation
         minerva_output.append(sched_parse.conflict_report(r.text,report))
-    else:
+    else: # Course Details Report
         minerva_output.append(sched_parse.course_details_report(r.text,report))
-        if not no_conflicts:
+        if not no_conflicts: # Include Conflicts, or omit
             minerva_output.append(sched_parse.conflict_report(r.text,'conflicts'))
     return minerva_output.get_content()
 

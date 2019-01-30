@@ -216,7 +216,7 @@ def exec_reg(args):
 
 def exec_sched(args):
     term = get_term_code(args.term)
-    
+    # report = timetable_default | cal_exams | cal_default | conflicts | exams_default | long | short | default
     if args.report is not None:
         report = args.report
     elif args.visual:
@@ -236,7 +236,10 @@ def exec_sched(args):
         report = 'short'
     else:
         report = 'default'
-    
+    # visual = False | True & 'timetable_default'
+    # calendar = False | True & ('cal_exams' | 'cal_default')
+    # conflicts_only = False | True & 'conflicts'
+    # no_conflicts = False | True
     if not args.exams:
         sched.course_details(term,report,visual=args.visual,calendar=args.calendar,conflicts_only=args.conflicts_only,no_conflicts=args.no_conflicts)
     else:
