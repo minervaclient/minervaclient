@@ -34,8 +34,8 @@ def process(data):
 def get_source(text): 
     html = bs(text,'html5lib')
     srcs = html.find_all('source')
-    course = html.find('span', {'id': 'TabContainer1_TabPanel1_LabelCourse'}).text
-    date = html.find('span', {'id': 'TabContainer1_TabPanel1_LabelRecordingDate'}).text
+    course = html.find('span', {'id': 'LabelCourse'}).text
+    date = html.find('span', {'id': 'LabelRecordingDate'}).text
     date = dt.strptime(date,'%m/%d/%Y %H:%M:%S %p').strftime('%m-%d')
     course = "-".join(course.split("-")[:-1])
     fname = "-".join([course,date]) + ".mp4"
