@@ -31,7 +31,7 @@ class MinervaClient(object):
         CRNs, Sections, Section Types, Intructors, Times, or Locations.  Not 
         good for retrieving realtime waitlist/seat information. use 
         MinervaClient.auth_search for retrieving up-to-date information."""
-        return self.obj_pub_search.search(term,course_codes, **kwargs)
+        return PubSearch.search(term,course_codes, **kwargs)
     def auth_search(self, term,course_codes,**kwargs):
         """Retrieves information about a course from Minerva, but requiring login
         credentials.  Useful for obtaining information about the course such as
@@ -1137,10 +1137,11 @@ import json
 if __name__ == '__main__':
     client = MinervaClient()
     client.login()
+    print(client.pub_search('201909',[ 'ECSE-200-001','ECSE-200-003','ECSE-222-001','ECSE-222-003','ECSE-223-001','ECSE-223-002','MATH-240-002','MATH-262-001','MATH-262-005','MATH-263-001','MATH-263-003' ],fmt='calendar'))
     # obj = client.pub_search('201901',['ECSE-205-001','ECSE-205-002','ECSE-223-001','ECSE-223-003','COMP-302-001','ECON-209-003','URBP-201-001','URBP-201-004','COMP-273-001'],fmt='calendar')
     # print(client.pub_search('201901',['ECSE-205-001','ECSE-205-002','COMP-302-001','ECON-209-003','URBP-201-001','URBP-201-004'],fmt='text'))
     # obj = (client.auth_search('201901',['ECSE-205-001','ECSE-205-002','COMP-302-001','ECON-209-003','URBP-201-001','URBP-201-004']))
-    print(client.auth_search('201901',['ECSE-205-001','ECSE-205-002','COMP-302-001','ECON-209-003','URBP-201-001','URBP-201-004'],fmt='calendar'))
+    #print(client.auth_search('201901',['ECSE-205-001','ECSE-205-002','COMP-302-001','ECON-209-003','URBP-201-001','URBP-201-004'],fmt='calendar'))
     # print( client.auth_search('201901',['ECSE-205-001'],fmt='calendar'))
     # print( client.auth_search('201901',['ECSE-205-001'],fmt='json'))
     # print( client.pub_search('201901',['math-133-001','math-133-004','ecse-321-001','ecse-321-002','ECSE-223-001','ECSE-223-003','COMP-273-001'],fmt='calendar'))
