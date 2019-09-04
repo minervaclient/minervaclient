@@ -207,13 +207,13 @@ term_regex =  """
 ^(
         (
             (?P<tf_session>F(all)?|W(inter)?|S(ummer)?)
-            -?(?P<tf_sup1>Sup(plementary)?)?
+            -?(?P<tf_sup1>Sup(plemental)?)?
             -?(?P<tf_year>\d{2,4})
-            -?(?P<tf_sup2>Sup(plementary)?)?
+            -?(?P<tf_sup2>Sup(plemental)?)?
         )|(
             (?P<yf_year>\d{2,4})
             -?(?P<yf_session>F(all)?|W(inter)?|S(ummer)?)
-            -?(?P<yf_sup>Sup(plementary)?)?
+            -?(?P<yf_sup>Sup(plemental)?)?
         )
     )$
 """
