@@ -13,3 +13,5 @@ state.dat
 shib_credentials.py
 build/
 dist/
+
+.cache

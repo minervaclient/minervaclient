@@ -26,14 +26,14 @@ except ImportError:
 
 class MinervaCommon(object):
     iso_date = {
-        'date': '%Y-%m-%d',
-        'time': '%H:%M',
-        'full': '%Y%m%dT%H%M%S'
+        'date': '%Y-%m-%d',     # 2019-04-23 datetime
+        'time': '%H:%M',        # 23:54
+        'full': '%Y%m%dT%H%M%S' # 20190423T235458
     }
     minerva_date = {
-        'date': '%b %d, %Y',
-        'time': '%I:%M %p',
-        'full': '%b %d, %Y %I:%M %p'
+        'date': '%b %d, %Y', # Jan 01, 2013 datetime
+        'time': '%I:%M %p',  # 12:04 PM
+        'full': '%b %d, %Y %I:%M %p' # Jan 01, 2013 12:04 PM
     }
     def __init__(self):
         self.is_minerva_based = True # Determines whether the stored credentials are mcgill email or minerva id login
@@ -162,7 +162,7 @@ class MinervaCommon(object):
         if verbose is None: verbose = self.show_err
         bad_sid = not str(sid).isdigit() or len(str(sid)) != 9
         bad_pin = len(pin) != 6 or not (pin.islower() and pin.isalnum())
-        for char in pin: # no character repeatedt least athrice
+        for char in pin: # no character repeated at least thrice
             if pin.count(char) >= 3:
                 bad_pin = False
         if verbose:
