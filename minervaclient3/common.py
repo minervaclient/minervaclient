@@ -24,6 +24,8 @@ except ImportError:
     # from . import credentials as local_credentials
     print("Error must install 'keyring' for this feature")
 
+import formatter
+
 class MinervaCommon(object):
     iso_date = {
         'date': '%Y-%m-%d',     # 2019-04-23 datetime
@@ -495,3 +497,7 @@ class MinervaCommon(object):
     def text_sanitize(text):
         """Encodes given text to ASCII"""
         return text.encode('ascii','ignore')
+
+class Course(formatter.Formattable):
+    def __init__(self):
+        pass
