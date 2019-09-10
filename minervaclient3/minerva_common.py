@@ -10,6 +10,8 @@ import json
 import re
 from bs4 import BeautifulSoup
 
+from . import minerva_formatter as minerva_formatter
+
 try:
     import html5lib
     parser = 'html5lib'
@@ -23,8 +25,6 @@ try:
 except ImportError:
     # from . import credentials as local_credentials
     print("Error must install 'keyring' for this feature")
-
-import formatter
 
 class MinervaCommon(object):
     iso_date = {
@@ -498,6 +498,6 @@ class MinervaCommon(object):
         """Encodes given text to ASCII"""
         return text.encode('ascii','ignore')
 
-class Course(formatter.Formattable):
+class Course(minerva_formatter.Formattable):
     def __init__(self):
         pass

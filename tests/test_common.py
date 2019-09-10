@@ -51,5 +51,5 @@ def test_login(monkeypatch):
         original_pin = mnvc0.pin
         assert mnvc0.verify_sid_credentials(original_sid,original_pin,verbose=True),"Invalid sid credentials were stored"
     
-    
+
 

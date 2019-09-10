@@ -1,6 +1,6 @@
 # Minervaclient 3
 
-common.py  
+minerva_common.py  
 MinervaConfig
 MinervaCommon
 MinervaState
@@ -17,8 +17,8 @@ Course
 public_search.py  
 ecalendar_search.py  
 vsb_search.py  
-client.py  
-formatter.py  
+minerva_client.py  
+minerva_formatter.py  
 
 transcript.py  
 schedule.py  
