@@ -50,8 +50,10 @@ class MinervaCommon(object):
         self.session = requests.Session()
         self.verbose = False
         self.show_err = True
-
-    def _minerva_get(self, func):
+    def _save_page(self,req,name):
+        with open(name,'wb') as f:
+            f.write(req.content)
+    def _minerva_get(self, func, url=None):
         """A GET request to minerva that accepts a string: the GET request arguments.
         
         """
@@ -59,11 +61,13 @@ class MinervaCommon(object):
             sys.stderr.write("? " + func + "\n")
 
         # global referer
-        url = "https://horizon.mcgill.ca/pban1/" + func
+        if url is None:
+            url = "https://horizon.mcgill.ca/pban1/"
+        url += func
         r = self.session.get(url,cookies = self.cookie_data, headers={'Referer': self.referer})
         self.referer = url
         return r
-    def _minerva_post(self, func, req):
+    def _minerva_post(self, func, req, url=None):
         """A POST request to minerva that accepts a string for URL arguments and the data for the POST request.
 
         """
@@ -71,7 +75,9 @@ class MinervaCommon(object):
             sys.stderr.write("> " + func + "\n")
 
         # global referer
-        url = "https://horizon.mcgill.ca/pban1/" + func
+        if url is None:
+            url = "https://horizon.mcgill.ca/pban1/"
+        url += func
         r = self.session.post(url,data = req,cookies = self.cookie_data,headers = {'Referer': self.referer})
         self.referer = url
         return r
