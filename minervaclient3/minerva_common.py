@@ -26,6 +26,13 @@ except ImportError:
     # from . import credentials as local_credentials
     print("Error must install 'keyring' for this feature")
 
+class MinervaState(object):
+    register,wait,closed,possible,unknown,wait_places_remaining,full,full_places_remaining,only_waitlist_known = list(range(9))
+class MinervaError(object):
+    reg_ok,reg_fail,reg_wait,course_none,course_not_found,user_error,net_error,require_unsatisfiable = list(range(8))
+class OutputType(object):
+    json,csv,pretty = list(range(3))
+
 class MinervaCommon(object):
     iso_date = {
         'date': '%Y-%m-%d',     # 2019-04-23 datetime
@@ -50,9 +57,16 @@ class MinervaCommon(object):
         self.session = requests.Session()
         self.verbose = False
         self.show_err = True
-    def _save_page(self,req,name):
+    @staticmethod
+    def _save_page(req,name):
         with open(name,'wb') as f:
             f.write(req.content)
+    @staticmethod
+    def _load_page(name):
+        result = ''
+        with open(name,'r') as f:
+            result = f.read()
+        return result
     def _minerva_get(self, func, url=None):
         """A GET request to minerva that accepts a string: the GET request arguments.
         
@@ -506,4 +520,33 @@ class MinervaCommon(object):
 
 class Course(minerva_formatter.Formattable):
     def __init__(self):
-        pass
+        self.credit = ''
+        self.subject_code = ''
+        self.course_code = ''
+        self.title = ''
+        self.description = ''
+        
+        self.duration = ''
+        self.crn_code = ''
+        self.section_code = ''
+        self.start_date = ''
+        self.end_date = ''
+        self.term = ''
+        self.grad_level = ''
+    @staticmethod
+    def dumps(d,paired_keys=None):
+        """{'term':'assoc_term_in'}"""
+        if paired_keys == None: paired_keys = []
+        new_course = Course()
+        keys = list(new_course.__dict__.keys())
+        for key in keys:
+            k = paired_keys[key] if key in paired_keys else key
+            if k in d:
+                setattr(new_course,key,d[k])
+        return new_course
+    def get_dict(self):
+        d = self.__dict__
+        return { k:d[k] for k in d if d[k] }
+    def get_empty_dict(self):
+        d = self.__dict__
+        return { k:d[k] for k in d if not d[k] }

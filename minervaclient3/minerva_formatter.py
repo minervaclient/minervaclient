@@ -20,7 +20,7 @@ def flatten(d,parent="",sep="_"):
 class Formattable(object):
     def stringify(self):
         """converts predetermined types in Formattable objects into strings; leaves other types alone"""
-        d = self.__dict__
+        d = self.get_dict()
         def proc(v):
             if isinstance(v,datetime):
                 return v.strftime(default_date_format)
@@ -54,6 +54,8 @@ class Formattable(object):
         pass
     def __str__(self):
         return pprint.pformat(self.stringify())
+    def get_dict(self):
+        return self.__dict__
 
 class Calendar(Formattable):
     begin_cal = u"""BEGIN:VCALENDAR
@@ -102,8 +104,10 @@ class Event(Formattable):
         self.date_end = timestamp.strftime(self.ics_date)
     def set_repeat_days_limit(self,value):
         self.by_day = int(value) if int(value) > 0 else 1
+    def get_dict(self):
+        return self.__dict__
     def ics(self):
-        d = self.__dict__
+        d = self.get_dict()
         result = "BEGIN:VEVENT\n"
         for k in self.ics_order:
             if k in d and d[k] is not None:
