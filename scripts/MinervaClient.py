@@ -1074,7 +1074,7 @@ if __name__ == '__main__':
     # print(client.pub_search('201901',['ECSE-205-001','ECSE-205-002','ECSE-223-001','ECSE-223-003'],fmt='json'))
     # print(client.pub_search('201901',['ECSE-205-001','ECSE-205-002'],fmt='text'))
     # <--Testing the MinervaCommon.initial_login-->
-    # client.initial_login(sid="260822502",inConsole=True,temporary=True)
+    # client.initial_login(sid="",inConsole=True,temporary=True)
     # client._minerva_login_request()
     # if not client._minerva_login_request():
     #     print('Login Unsuccessful')

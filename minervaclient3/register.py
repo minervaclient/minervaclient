@@ -5,31 +5,31 @@ from .minerva_formatter import Formattable
 def register_courses(mnvc,term,crns,dry_run=False):
     courses = load_registration_page(mnvc,term)
     # RegInfo(courses.text) # DEBUG
-    mnvc._save_page(courses,'{}register1.html'.format(mnvc.sid)) # DEBUG SAVE
-    print("* You will be registered in the following CRNs " + str(crns))
+    mnvc._save_page(courses,'{}register1_2.html'.format(mnvc.sid)) # DEBUG SAVE
+    # print("* You will be registered in the following CRNs " + str(crns))
     if not dry_run: # register courses
         reg_data = quick_add_insert(courses.text,crns) # returns the post data
         reg_result = mnvc._minerva_post('bwckcoms.P_Regs',reg_data)
-        mnvc._save_page(reg_result,'{}register2_1.html'.format(mnvc.sid)) # DEBUG SAVE
+        mnvc._save_page(reg_result,'{}register2_2.html'.format(mnvc.sid)) # DEBUG SAVE
         add_result = quick_add_status(reg_result.text)
 
         if add_result == MinervaError.reg_wait: # waitlist situation
             wait_request = quick_add_wait(reg_result.text)
             if wait_request:
                 reg_result = mnvc._minerva_post('bwckcoms.P_Regs',wait_request)
-                mnvc._save_page(reg_result,'{}register3_1.html'.format(mnvc.sid)) # DEBUG SAVE
+                mnvc._save_page(reg_result,'{}register3_2.html'.format(mnvc.sid)) # DEBUG SAVE
             else:
                 add_result = quick_add_issue("Waitlist really is full.")
         if add_result == MinervaError.reg_fail: # big fail of registration
             sys.exit(MinervaError.reg_fail)
-        return add_result # Stopping the program here
+    
+    courses = load_registration_page(mnvc,term)
+    return RegInfo(courses.text).basic_show_info()
 
 class RegInfo(Formattable):
     course_keys = ['assoc_term_in','CRN_IN','start_date_in','end_date_in','SUBJ','CRSE','SEC','LEVL','CRED','TITLE']
     def __init__(self,text,fmt='text'):
         self.request = self.quick_show_info(text)
-        self.request = self.clean_show_info(self.request)
-        self.request = self.basic_show_info(self.request)
 
     def quick_show_info(self,text):
         html = MinervaCommon.minerva_parser(text)
@@ -63,7 +63,8 @@ class RegInfo(Formattable):
         return request
     def clean_show_info(self,request):
         return [ (name,val) for name,val in request if val != 'DUMMY' and val !='' ]
-    def basic_show_info(self,request):
+    def basic_show_info(self):
+        request = self.clean_show_info(self.request)
         input_pairs = [ (name,val) for name,val in request if name in self.course_keys ]
         cut_indices = [ i+1 for i in range(len(input_pairs)) if input_pairs[i][0] == 'TITLE' ]
         cut_indices.insert(0,0)
@@ -77,7 +78,7 @@ class RegInfo(Formattable):
 def quick_add_insert(text,crns):
     html = MinervaCommon.minerva_parser(text)
     forms = html.body.find_all('form')
-
+    
     reg = forms[1]
     input_boxes = reg.find_all(['input','select'])
     request = []
@@ -88,7 +89,6 @@ def quick_add_insert(text,crns):
                 print("A problem occurred:")
             else:
                 continue
-
         if input_box.has_attr('value'): #This should always fail for a select.
             val = input_box['value']
         else:
@@ -165,37 +165,11 @@ def load_registration_page(mnvc,term):
 
     return mnvc._minerva_post("bwskfreg.P_AltPin",{'term_in':term})
 
-# example registration
-def test_one(dry_run=False):
-    # initialize
-    mnvc = MinervaCommon()
-    # login
-    mnvc.initial_login()
-    print(mnvc._minerva_login_request())
-    # register without attempting to check anything first
-    term = '202001' # input
-    # crns = ['20714','20715']
-    crns = []
-    mnvc._minerva_reg_menu()
-    mnvc._minerva_get("bwskfreg.P_AltPin")
+# There aren't a lot of ways to test this so we're gonna do this code:
+# python3 -c "from minervaclient3 import register,minerva_common; mnvc = minerva_common.MinervaCommon();mnvc.initial_login();print(str(register.register_courses(mnvc,'201909',[])[0]))"
 
-    courses = mnvc._minerva_post("bwskfreg.P_AltPin",{'term_in':term})
-    RegInfo(courses.text)
-    mnvc._save_page(courses,'{}register1.html'.format(mnvc.sid)) # DEBUG SAVE
-    print("* You will be registered in the following CRNs " + str(crns))
-    if not dry_run: # register courses
-        reg_data = quick_add_insert(courses.text,crns) # returns the post data
-        reg_result = mnvc._minerva_post('bwckcoms.P_Regs',reg_data)
-        mnvc._save_page(reg_result,'{}register2_1.html'.format(mnvc.sid)) # DEBUG SAVE
-        add_result = quick_add_status(reg_result.text)
-
-        if add_result == MinervaError.reg_wait: # waitlist situation
-            wait_request = quick_add_wait(reg_result.text)
-            if wait_request:
-                reg_result = mnvc._minerva_post('bwckcoms.P_Regs',wait_request)
-                mnvc._save_page(reg_result,'{}register3_1.html'.format(mnvc.sid)) # DEBUG SAVE
-            else:
-                add_result = quick_add_issue("Waitlist really is full.")
-        if add_result == MinervaError.reg_fail: # big fail of registration
-            sys.exit(MinervaError.reg_fail)
-        return add_result # Stopping the program here
+# Script form of test script:
+# from minervaclient3 import register,minerva_common
+# mnvc = minerva_common.MinervaCommon()
+# mnvc.initial_login
+# print(str(register.register_courses(mnvc,'201909',[])[0])) # Prints your first class displayed on add/drop
