@@ -69,8 +69,8 @@ class RegInfo(Formattable):
         cut_indices = [ i+1 for i in range(len(input_pairs)) if input_pairs[i][0] == 'TITLE' ]
         cut_indices.insert(0,0)
         lst_courses = [ dict(input_pairs[cut_indices[i]:cut_indices[i+1]]) for i in range(len(cut_indices)-1)]
-        return [ str(self.create_course(dict(i))) for i in lst_courses ]
-    def create_course(self,d):
+        return [ str(self._create_course(dict(i))) for i in lst_courses ]
+    def _create_course(self,d):
         keys = ['term','crn','start_date','end_date','subject_code','course_code','section_code','grad_level','credit','title']
         pairs = dict(zip(keys,self.course_keys))
         return Course.dumps(d,pairs)

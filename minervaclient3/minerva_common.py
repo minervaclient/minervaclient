@@ -526,11 +526,28 @@ class Course(minerva_formatter.Formattable):
         self.title = ''
         self.description = ''
         
-        self.duration = ''
+        self.instructor = ''
+        self.section_type = ''
         self.crn_code = ''
         self.section_code = ''
-        self.start_date = ''
-        self.end_date = ''
+
+        self.waitlist_available = None
+        self.waitlist_remaining = None
+        self.waitlist_capacity  = None
+        self.seats_available = None
+        self.seats_remaining = None
+        self.seats_capacity  = None
+        
+        self.days_active = ''
+        self.duration = ''
+        self.start_time = None
+        self.end_time = None
+        self.start_date = None
+        self.end_date = None
+        self.location = ''
+        self.activity_status = ''
+
+        self.whole_code = ''
         self.term = ''
         self.grad_level = ''
     @staticmethod
