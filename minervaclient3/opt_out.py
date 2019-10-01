@@ -1,4 +1,4 @@
-import minerva_common
+from . import minerva_common
 opt_out = 'bztkopto.pm_opt_out_processing'
 
 def opt_out(mnvc):

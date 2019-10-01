@@ -4,11 +4,40 @@ import re
 
 
 from .minerva_common import MinervaCommon
+from . import pub_search
 
-def search(term,course_codes):
-    pass
+def search(term,course_codes,progress=False):
+    if type(course_codes) != list:
+        course_codes = [ (course_codes) ]
+    else:
+        course_codes = [ (c) for c in course_codes]
 
-def specific_search(term,course_codes):
+    result = []
+
+    for course_code in course_codes:
+        if len(course_code.split('-'))==1: # If the course_code is just a subject
+            result.extend(query_courses_by_subject(term,course_code))
+        else:
+            result.append(course_code)
+    # print(result)
+    return specific_search(term,result,progress=progress)
+
+def query_courses_by_subject(term, subject_code):
+    """Get a list of all the courses of a given term, of given subject(s) from Minerva. 
+    Accepts a term (of any form) and subject code(s) (single string or a list of strings), whether in the form COMP, COMP-206, or COMP-206-002"""
+    if type(subject_code) == str:
+        subject_code = [subject_code]
+    subject_code = [ code.upper() for code in subject_code]
+    
+    raw_subject_keys = [ key[:-4] for key in pub_search.search(MinervaCommon.get_term_code(term), subject_code,fmt='dictionary')]
+    raw_subject_keys.sort()
+    subject_keys = []
+    for key in raw_subject_keys:
+        if key not in subject_keys:
+            subject_keys.append(key)
+    return subject_keys
+
+def specific_search(term,course_codes, progress=False):
     """The main ecalendar searching method"""
     # Turn course_codes into a list of strings if it isn't already
     if type(course_codes) != list:
@@ -20,20 +49,21 @@ def specific_search(term,course_codes):
     term = convert_ecalendar_term(term)
 
     # Get the ecalendar dictionaries and put into a list
-    courses_list = [ ecalendar_get(term,code) for code in course_codes ]
+    courses_list = [ ecalendar_get(term,code, progress=progress) for code in course_codes ]
     return courses_list
 
-def ecalendar_get(term, course_code, debug=False):
+def ecalendar_get(term, course_code, progress=False, debug=False):
     """Gets a dictionary of information about a course, for the given term year and course 
     term takes the format of yyyy-yyyy, for example, 2018-2019
     course_code takes the format of cccc-xxx, for example, comp-206"""
     term, course_code = ecalendar_input_format(term,course_code)
     page = requests.get("https://www.mcgill.ca/study/"+term+"/courses/"+course_code)
     if page.status_code != 200:
-        if debug:
+        if debug or progress:
             print(course_code)
         raise Exception('Could not connect')
-
+    if progress:
+        print(course_code)
     content = page.content
     soup = MinervaCommon.minerva_parser(content)
     container = soup.find(id="inner-container")
@@ -95,7 +125,7 @@ def convert_ecalendar_crse(course_code):
     if code_parts[0].isalpha() and code_parts[1].isalnum():
         return code_parts[0]+"-"+code_parts[1] # gives formatted course code
     else:
-        raise ValueError('Must provide valid input for course code, (ie. comp-206, cCoM-206d5, ECON-208-100)')
+        raise ValueError('Must provide valid input for course code, (ie. comp-206, cCoM-206d5, ECON-208-100): {}'.format(course_code))
 
 def convert_ecalendar_term(term):
     """McGill eCalendar uses a different term/year format, so 201809, 201901, and 201905 all become 2018-2019, unless it already is 2018-2019"""
@@ -135,3 +165,16 @@ def ecalendar_input_format(term,course_code):
     else:
         print (is_ecalendar_crse(course_code))
         raise ValueError('Must provide valid input for course code and term year (minerva or ecalendar)')
+
+
+pair_keys = {
+    'description':'overview',
+    'instructor':'instructors',
+    'faculty':'offer_link_text',
+
+}
+def _create_course(obj):
+    # def proc(k,v): # For processing the values to convert them
+    #     return v
+    # obj = { k,proc(k,v) for k,v in obj.items() }
+    return Course.dumps(obj,pair_keys)

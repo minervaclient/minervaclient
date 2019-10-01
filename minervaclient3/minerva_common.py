@@ -536,45 +536,48 @@ class MinervaCommon(object):
 
 class Course(minerva_formatter.Formattable):
     def __init__(self):
-        self.credit = ''
-        self.subject_code = ''
+        self.credit = '' 
+        self.subject_code = '' 
         self.course_code = ''
         self.title = ''
         self.description = ''
+        self.notes = '' # from eCalendar
         
-        self.instructor = ''
+        self.instructor = '' # needs processing if from eCalendar
         self.section_type = ''
         self.crn_code = ''
         self.section_code = ''
         self.grade_mode = ''
 
 
-        self.waitlist_occupied = None
-        self.waitlist_remaining = None
-        self.waitlist_capacity  = None
-        self.seats_occupied = None
-        self.seats_remaining = None
-        self.seats_capacity  = None
+        self.waitlist_occupied = None  # from auth_search
+        self.waitlist_remaining = None # from auth_search
+        self.waitlist_capacity  = None # from auth_search
+        self.seats_occupied = None     # from auth_search
+        self.seats_remaining = None    # from auth_search
+        self.seats_capacity  = None    # from auth_search
         
-        self.days_active = ''
-        self.duration = ''
+        self.days_active = '' # 'MTWRF'
+        self.duration = '' # probably needs calculation
         self.start_time = None
         self.end_time = None
         self.start_date = None
         self.end_date = None
+        self.years = '' # from eCalendar
         
         self.location = ''
-        self.campus = ''
+        self.campus = '' # from schedule
         self.building = ''
-        self.room = ''
-        self.map_link = ''
+        self.room = '' 
+        self.map_link = '' # from schedule
 
         self.whole_code = ''
         self.term = ''
         self.grad_level = ''
         self.activity_status = ''
-        self.select = None
-        self._state = None
+        self.faculty = '' # from eCalendar
+        self.select = None # from pub_search, auth_search
+        self._state = None # from pub_search, auth_search
     @staticmethod
     def dumps(d,paired_keys=None):
         """{'term':'assoc_term_in'}"""

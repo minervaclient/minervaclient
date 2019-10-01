@@ -55,7 +55,7 @@ def post_search(term,course_codes):
     """ Helper function that performs the POST request to retrieve 
     the data and returns a parsed python dictionary based on the request"""
     request = build_request(term,course_codes)
-    sys.stderr.write("> bwckgens.csv\n") # DEBUG TODO: should remove this line?
+    # sys.stderr.write("> bwckgens.csv\n") # DEBUG TODO: should remove this line?
     result = requests.post("https://horizon.mcgill.ca/rm-PBAN1/bwckgens.csv",request)
     return parse_search(result.text,MinervaCommon.get_term_code(term))
 
