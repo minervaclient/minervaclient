@@ -5,6 +5,7 @@ import io
 import collections
 import pprint
 import typing
+import icalendar
 
 default_date_format = "%Y-%m-%dT%H:%M:%S"
 
@@ -57,6 +58,18 @@ class Formattable(object):
     def get_dict(self):
         return self.__dict__
 
+class iCalendar(Formattable):
+    def __init__(self):
+        self.events = []
+    def ics(self):
+        pass
+class iEvent(Formattable):
+    def __init__(self):
+        pass
+    def ics(self):
+        pass
+
+
 class Calendar(Formattable):
     begin_cal = u"""BEGIN:VCALENDAR
 VERSION:2.0
@@ -64,6 +77,10 @@ PRODID:-//Minervaclient//NONSGML minervac.icebergsys.net//EN"""
     end_cal = u"""
 END:VCALENDAR"""
     def __init__(self):
+        self.events = []
+    def add_event(self,event):
+        self.events.append(event)
+    def to_ics(self):
         pass
 class Event(Formattable):
     ics_format = {

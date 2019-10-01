@@ -28,11 +28,11 @@ def register_courses(mnvc,term,crns,dry_run=False):
 
 class RegInfo(Formattable):
     course_keys = ['assoc_term_in','CRN_IN','start_date_in','end_date_in','SUBJ','CRSE','SEC','LEVL','CRED','TITLE']
-    def __init__(self,text,fmt='text'):
-        self.request = self.quick_show_info(text)
+    def __init__(self,text=None,fmt='text'):
+        self.text = text
 
-    def quick_show_info(self,text):
-        html = MinervaCommon.minerva_parser(text)
+    def quick_show_info(self):
+        html = MinervaCommon.minerva_parser(self.text)
         forms = html.body.find_all('form')
         reg = forms[1]
         input_boxes = reg.find_all(['input','select'])
@@ -64,7 +64,8 @@ class RegInfo(Formattable):
     def clean_show_info(self,request):
         return [ (name,val) for name,val in request if val != 'DUMMY' and val !='' ]
     def basic_show_info(self):
-        request = self.clean_show_info(self.request)
+        request = self.quick_show_info()
+        request = self.clean_show_info(request)
         input_pairs = [ (name,val) for name,val in request if name in self.course_keys ]
         cut_indices = [ i+1 for i in range(len(input_pairs)) if input_pairs[i][0] == 'TITLE' ]
         cut_indices.insert(0,0)
@@ -164,6 +165,10 @@ def load_registration_page(mnvc,term):
     mnvc._minerva_get("bwskfreg.P_AltPin")
 
     return mnvc._minerva_post("bwskfreg.P_AltPin",{'term_in':term})
+def show_registration_page(mnvc,term):
+    req = load_registration_page(mnvc,term)
+    reg = RegInfo(req.text)
+    return reg.basic_show_info()
 
 # There aren't a lot of ways to test this so we're gonna do this code:
 # python3 -c "from minervaclient3 import register,minerva_common; mnvc = minerva_common.MinervaCommon();mnvc.initial_login();print(str(register.register_courses(mnvc,'201909',[])[0]))"

@@ -32,6 +32,18 @@ class MinervaError(object):
     reg_ok,reg_fail,reg_wait,course_none,course_not_found,user_error,net_error,require_unsatisfiable = list(range(8))
 class OutputType(object):
     json,csv,pretty = list(range(3))
+class MinervaConfig(object):
+    #### Formatting
+    date_fmt = {
+        'short_date': '%-m/%-d', # Short date
+        'short_datetime': '%-m/%-d %-H:%-M', # Short date and time
+        'short_time': '%Hh%M', # Quebec style time format
+        'full_date': '%Y-%m-%d', # ISO date format
+        'exam_date': '%a, %b %e', # Provides day of the week, abbreviated month and day
+        'exam_date_continued': '(%a) %-d', # When two day exams are scheduled
+        'exam_time': '%-l:%M %p' # Starting time for exams
+        }
+
 
 class MinervaCommon(object):
     iso_date = {
@@ -67,6 +79,10 @@ class MinervaCommon(object):
         with open(name,'r') as f:
             result = f.read()
         return result
+    def minerva_get(self,link,url=None):
+        return self._minerva_get(link,url)
+    def minerva_post(self, link, req, url=None):
+        return self._minerva_post(link,req,url)
     def _minerva_get(self, func, url=None):
         """A GET request to minerva that accepts a string: the GET request arguments.
         
@@ -530,11 +546,13 @@ class Course(minerva_formatter.Formattable):
         self.section_type = ''
         self.crn_code = ''
         self.section_code = ''
+        self.grade_mode = ''
 
-        self.waitlist_available = None
+
+        self.waitlist_occupied = None
         self.waitlist_remaining = None
         self.waitlist_capacity  = None
-        self.seats_available = None
+        self.seats_occupied = None
         self.seats_remaining = None
         self.seats_capacity  = None
         
@@ -544,12 +562,19 @@ class Course(minerva_formatter.Formattable):
         self.end_time = None
         self.start_date = None
         self.end_date = None
+        
         self.location = ''
-        self.activity_status = ''
+        self.campus = ''
+        self.building = ''
+        self.room = ''
+        self.map_link = ''
 
         self.whole_code = ''
         self.term = ''
         self.grad_level = ''
+        self.activity_status = ''
+        self.select = None
+        self._state = None
     @staticmethod
     def dumps(d,paired_keys=None):
         """{'term':'assoc_term_in'}"""
@@ -563,7 +588,7 @@ class Course(minerva_formatter.Formattable):
         return new_course
     def get_dict(self):
         d = self.__dict__
-        return { k:d[k] for k in d if d[k] }
+        return { k:d[k] for k in d if d[k] or (type(d[k])==int and d[k]==0)}
     def get_empty_dict(self):
         d = self.__dict__
         return { k:d[k] for k in d if not d[k] }

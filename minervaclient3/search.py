@@ -24,9 +24,12 @@ def search(term,course_codes,fmt='',**kwargs):
     """
     courses_obj = post_search(term,course_codes)
     full_codes = []
-    
+
+    # Filter out only the codes that you want
     # This used to be a bunch of for loops, but it's fine as a giant single line :D
     full_codes = { course:courses_obj[course] for course in courses_obj if (not all( [ (code.upper() not in course) for code in course_codes ] )) }
+    
+    # Filter the codes even further using the kwargs. kwargs supplied could be: 'type':'Lecture', 'instructor':'John'
     filtered_codes = {}
     if kwargs:
         for course in full_codes:
@@ -50,7 +53,7 @@ def search(term,course_codes,fmt='',**kwargs):
 
 def post_search(term,course_codes):
     """ Helper function that performs the POST request to retrieve 
-    the data and returns a logical python dictionary based on the request"""
+    the data and returns a parsed python dictionary based on the request"""
     request = build_request(term,course_codes)
     sys.stderr.write("> bwckgens.csv\n") # DEBUG TODO: should remove this line?
     result = requests.post("https://horizon.mcgill.ca/rm-PBAN1/bwckgens.csv",request)
@@ -204,7 +207,7 @@ pair_keys = {
     'whole_code':'_code',
 }
 def _create_course(obj):
-    return Course.dumps(obj,pair_keys)
+    return Course.dumps(dict(flatten(obj)),pair_keys)
 
 
 
