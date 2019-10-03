@@ -43,6 +43,12 @@ class MinervaConfig(object):
         'exam_date_continued': '(%a) %-d', # When two day exams are scheduled
         'exam_time': '%-l:%M %p' # Starting time for exams
         }
+    default_settings = {
+
+    }
+    def __init__(self):
+        pass
+
 
 
 class MinervaCommon(object):
@@ -535,49 +541,56 @@ class MinervaCommon(object):
         return text.encode('ascii','ignore')
 
 class Course(minerva_formatter.Formattable):
+    ecal_keys = ['description','instructor','faculty','notes','years','faculty','title']
+    pub_search_keys = ['days_active', 'term', 'instructor', 'start_date', 'credit', 'course_code', 'select', 'section_code', 'activity_status', 'end_date', '_state', 'crn_code', 'location', 'title', 'end_time', 'start_time', 'section_type', 'subject_code', 'whole_code']
+    auth_search_keys = ['term', 'start_date', 'credit', 'seats_capacity', 'seats_occupied', '_state', 'crn_code', 'location', 'title', 'seats_remaining', 'days_active', 'instructor', 'course_code', 'waitlist_occupied', 'select', 'section_code', 'activity_status', 'end_date', 'waitlist_remaining', 'section_type', 'end_time', 'start_time', 'subject_code', 'waitlist_capacity', 'whole_code']
+    schedule_keys = ['building', 'days_active', 'term', 'instructor', 'start_date', 'credit', 'subject_code', 'section_code', 'end_date', 'map_link', 'grad_level', 'location', 'title', 'end_time', 'start_time', 'section_type', 'room', 'campus', 'grade_mode', 'course_code', 'whole_code']
+
     def __init__(self):
-        self.credit = '' 
-        self.subject_code = '' 
-        self.course_code = ''
-        self.title = ''
-        self.description = ''
-        self.notes = '' # from eCalendar
+        key_sets = [ Course.__dict__[keys] for keys in Course.__dict__ if '_keys' in keys]
+        for key in [ k for l in key_sets for k in l ]:
+            setattr(self,key,None)
+        # self.credit = '' 
+        # self.subject_code = '' 
+        # self.course_code = ''
+        # self.title = ''
+        # self.description = ''
+        # self.notes = '' # from eCalendar
         
-        self.instructor = '' # needs processing if from eCalendar
-        self.section_type = ''
-        self.crn_code = ''
-        self.section_code = ''
-        self.grade_mode = ''
+        # self.instructor = '' # needs processing if from eCalendar
+        # self.section_type = ''
+        # self.crn_code = ''
+        # self.section_code = ''
+        # self.grade_mode = ''
 
-
-        self.waitlist_occupied = None  # from auth_search
-        self.waitlist_remaining = None # from auth_search
-        self.waitlist_capacity  = None # from auth_search
-        self.seats_occupied = None     # from auth_search
-        self.seats_remaining = None    # from auth_search
-        self.seats_capacity  = None    # from auth_search
+        # self.waitlist_occupied = None  # from auth_search
+        # self.waitlist_remaining = None # from auth_search
+        # self.waitlist_capacity  = None # from auth_search
+        # self.seats_occupied = None     # from auth_search
+        # self.seats_remaining = None    # from auth_search
+        # self.seats_capacity  = None    # from auth_search
         
-        self.days_active = '' # 'MTWRF'
-        self.duration = '' # probably needs calculation
-        self.start_time = None
-        self.end_time = None
-        self.start_date = None
-        self.end_date = None
-        self.years = '' # from eCalendar
+        # self.days_active = '' # 'MTWRF'
+        # self.duration = '' # probably needs calculation
+        # self.start_time = None
+        # self.end_time = None
+        # self.start_date = None
+        # self.end_date = None
+        # self.years = '' # from eCalendar
         
-        self.location = ''
-        self.campus = '' # from schedule
-        self.building = ''
-        self.room = '' 
-        self.map_link = '' # from schedule
+        # self.location = ''
+        # self.campus = '' # from schedule
+        # self.building = ''
+        # self.room = '' 
+        # self.map_link = '' # from schedule
 
-        self.whole_code = ''
-        self.term = ''
-        self.grad_level = ''
-        self.activity_status = ''
-        self.faculty = '' # from eCalendar
-        self.select = None # from pub_search, auth_search
-        self._state = None # from pub_search, auth_search
+        # self.whole_code = ''
+        # self.term = ''
+        # self.grad_level = ''
+        # self.activity_status = ''
+        # self.faculty = '' # from eCalendar
+        # self.select = None # from pub_search, auth_search
+        # self._state = None # from pub_search, auth_search
     @staticmethod
     def dumps(d,paired_keys=None):
         """{'term':'assoc_term_in'}"""

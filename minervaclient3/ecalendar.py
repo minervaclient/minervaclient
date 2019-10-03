@@ -3,7 +3,7 @@ import time
 import re
 
 
-from .minerva_common import MinervaCommon
+from .minerva_common import MinervaCommon,Course
 from . import pub_search
 
 def search(term,course_codes,progress=False):
@@ -49,7 +49,7 @@ def specific_search(term,course_codes, progress=False):
     term = convert_ecalendar_term(term)
 
     # Get the ecalendar dictionaries and put into a list
-    courses_list = [ ecalendar_get(term,code, progress=progress) for code in course_codes ]
+    courses_list = [ _create_course(ecalendar_get(term,code, progress=progress)) for code in course_codes ]
     return courses_list
 
 def ecalendar_get(term, course_code, progress=False, debug=False):

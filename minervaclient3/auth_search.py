@@ -22,7 +22,8 @@ def search(mnvc, term, course_codes,singular=False,fmt='',**kwargs):
     Example: (['COMP-200-001', 'COMP-200-002', 'COMP-200-003', 'CCOM-206-018'], {all courses' data})
     {all courses' data}['COMP-200-002'] => {just the info for COMP-200-002}
     """
-
+    if type(course_codes)!=list:
+        course_codes = [course_codes]
     courses_obj = post_search(mnvc,term,course_codes,singular)
     full_codes = []
     # This used to be a bunch of for loops, but it's fine as a giant single line :D

@@ -48,7 +48,7 @@ def _create_course(obj):
         else:
             return v
     d = { k:parse(k,v) for k,v in dict(flatten(obj)).items()}
-    print(d)
+    # print(d)
     return Course.dumps(d,pair_keys)
 
 def parse_schedule(text,separate_wait = True):

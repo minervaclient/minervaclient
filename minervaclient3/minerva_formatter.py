@@ -6,6 +6,8 @@ import collections
 import pprint
 import typing
 import icalendar
+import types
+import sys
 
 default_date_format = "%Y-%m-%dT%H:%M:%S"
 
@@ -33,9 +35,9 @@ class Formattable(object):
         return result
     def flattened(self):
         return dict(flatten(self.stringify()))
-    def json(self):
+    def json(self,singular=False):
         return json.dumps(self.stringify(), indent=2,sort_keys = True)
-    def csv(self):
+    def csv(self,singular=False):
         d = self.flattened()
         stringio = io.StringIO()
         k = list(d.keys())
@@ -44,19 +46,61 @@ class Formattable(object):
         writer.writeheader()
         writer.writerow(d)
         return stringio.getvalue()
-    def yaml(self, human_readable=True):
+    def yaml(self, human_readable=True,singular=False):
         # author: Nicholas Paun
         import yaml
         if human_readable:
             yaml.add_multi_representer(list,yaml.representer.SafeRepresenter.represent_list)
             yaml.add_multi_representer(tuple,yaml.representer.SafeRepresenter.represent_list)
         return yaml.dump(self)
-    def sql(self):
+    def sql(self,singular=False):
         pass
     def __str__(self):
         return pprint.pformat(self.stringify())
     def get_dict(self):
         return self.__dict__
+    def dumps(obj,fmt_func=None):
+        try:
+            p = obj
+            if type(fmt_func)==types.FunctionType:
+                p = fmt_fun(obj)
+            if type(p)==dict:
+                for k,v in dict(flatten(p)).items():
+                    setattr(self,k,v)
+        except Exception as inst:
+            print(inst)
+        
+class MultiFormattable(object):
+    def __init__(self,formattables=None):
+        self.formattables = None
+        self.add(formattables)
+    def add(o):
+        """Accepts a single Formattable object, or list of Formattable objects"""
+        f = formattables
+        if not f:
+            return False
+        if type(formattables) != list:
+            f = [formattables]
+
+        f = [ i for i in f if isinstance(item,Formattable)]
+        for item in f:
+            self.formattables.append(item)
+        if f:
+            return True
+    def stringify(self):
+        return [ i.stringify() for i in self.formattables]
+    def flattened_list(self):
+        return [ i.flattened() for i in self.formattables ]
+    def flattened_dict(self,key=None):
+        if not key:
+            key_works = all([ hasattr(item,key) for item in self.formattables ])
+            if not key_works:
+                return None
+        try:
+            return { getattr(i,key):flattened(i) for i in self.formattables }
+        except Exception as e:
+            sys.stderr.write(e)
+            return None
 
 class iCalendar(Formattable):
     def __init__(self):
