@@ -410,7 +410,7 @@ class MinervaShell(Cmd):
         self.prompt = "\nminervac$ "
     def do_help(self,s):
         """Help introduction message"""
-        if s is not "":
+        if s != "":
             Cmd.do_help(self,s)
             return
         

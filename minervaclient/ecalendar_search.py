@@ -6,12 +6,13 @@
 from __future__ import print_function
 from __future__ import unicode_literals
 from builtins import str
+import sys
 import requests
 import time
 import re
 
 from . import pub_search
-from .minerva_common import get_term_code, MinervaOutput
+from .minerva_common import get_term_code, MinervaOutput, minerva_parser, OutputType
 
 # Start of main functions
 def ecalendar_exec(term_year, course_codes, page_parts=[],fmt=OutputType.json, inConsole=False):
@@ -31,7 +32,7 @@ def ecalendar_exec(term_year, course_codes, page_parts=[],fmt=OutputType.json, i
     info_parts = ['title','overview','terms','instructors','notes','faculty_offer','offer_link','offer_link_text'] # Order of parts to output
     minerva_output = MinervaOutput(inConsole=inConsole,fmt=fmt)
     for crse in info_list: # Go through each object
-        
+        pass
 
 
 def ecalendar_get_reqs(term_year, course_code, search_type=0):
@@ -89,10 +90,35 @@ def ecalendar_get(term_year, course_code, debug=False):
     term_year takes the format of yyyy-yyyy, for example, 2018-2019
     course_code takes the format of cccc-xxx, for example, comp-206"""
     term_year, course_code = ecalendar_input_format(term_year,course_code)
-    page = requests.get("https://www.mcgill.ca/study/"+term_year+"/courses/"+course_code)
+    return ecalendar_query("https://www.mcgill.ca/study/"+term_year+"/courses/"+course_code, debug)
+
+def ecalendar_get_search_page(lower=1, upper=None, step=None, debug=False):
+    search_page_pattern = "https://www.mcgill.ca/study/2021-2022/courses/search?page={}"
+    search_res_pattern = r'(?:https:\/\/www\.mcgill\.ca)?\/study\/([0-9]{4}-[0-9]{4})\/courses\/([a-z]{4}-[0-9]{3}[a-zA-Z0-9_]*)'
+    
+    r = None
+    if upper is None:
+        r = range(lower)
+    elif step is None:
+        r = range(lower, upper)
+    else:
+        r = range(lower, upper, step)
+    for i in r:
+        search_link = search_page_pattern.format(i)
+        search_page = requests.get(search_link)
+        soup = minerva_parser(search_page.content)
+        for el in soup.findAll('a', href=True):
+            link = el['href']
+            match = re.findall(search_res_pattern, link)
+            if len(match) > 0:
+                year, course = match[0]
+                yield ecalendar_get(year, course, debug)
+
+def ecalendar_query(link, debug=False):
+    page = requests.get(link)
     if page.status_code != 200:
         if debug:
-            print(course_code)
+            print('>', link, file=sys.stderr)
         raise Exception('Could not connect')
 
     content = page.content
@@ -266,3 +292,10 @@ if __name__=='__main__':
     print(ecalendar_input_format('201809','cCOM-206d4'))
     print(ecalendar_input_format('FALL2018','comp-205'))
     print(ecalendar_input_format('2019-WINTER','ecse-323'))
+
+    r'https:\/\/www\.mcgill\.ca\/study\/([0-9]{4}-[0-9]{4})\/courses\/([a-z]{4}-[0-9]{3}[a-zA-Z0-9_]*)'
+    # Ecalendar page links
+    # https://www.mcgill.ca/study/2021-2022/courses/search?page=548
+    # VSB course search suggestions
+    # https://vsb.mcgill.ca/vsb/add_suggest.jsp?term=202201&cams=Distance_Downtown_Macdonald_Off-Campus&course_add=ecse&page_num=0
+    
