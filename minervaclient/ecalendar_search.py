@@ -7,6 +7,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 from builtins import str
 import sys
+from bs4 import BeautifulSoup
 import requests
 import time
 import re
@@ -103,6 +104,7 @@ def ecalendar_get_search_page(lower=1, upper=None, step=None, debug=False):
         r = range(lower, upper)
     else:
         r = range(lower, upper, step)
+    
     for i in r:
         search_link = search_page_pattern.format(i)
         search_page = requests.get(search_link)
@@ -281,6 +283,45 @@ def ecalendar_input_format(term_year,course_code):
     else:
         print (is_ecalendar_crse(course_code))
         raise ValueError('Must provide valid input for course code and term year (minerva or ecalendar)')
+
+def vsb_suggest(term, phrase, lower=1, upper=None, step=None, debug=False):
+    suggest_pattern = "https://vsb.mcgill.ca/vsb/add_suggest.jsp?term={term}&cams=Distance_Downtown_Macdonald_Off-Campus&course_add={phrase}&page_num={index}"
+    term = get_term_code(str(term))
+    
+    r = None
+    if upper is None:
+        r = range(lower)
+    elif step is None:
+        r = range(lower, upper)
+    else:
+        r = range(lower, upper, step)
+    result = []
+    for i in r:
+        suggest_link = suggest_pattern.format(term=term, phrase=phrase, index=i)
+        for res in vsb_suggest_query(suggest_link, debug):
+            result.append(res)
+    
+def vsb_suggest_query(link, debug=False):
+    if debug:
+        print('>',link,file=sys.stderr)
+
+    headers = {
+        'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.71 Safari/537.36'
+    }
+    page = requests.get(link, headers=headers)
+    if page.status_code != 200:
+        if debug:
+            print('>', link, file=sys.stderr)
+        raise Exception('Could not connect')
+
+    soup = BeautifulSoup(page.content, 'lxml')
+    options = soup.findAll('rs')
+    
+    for opt in options:
+        if opt['info'] != "" and opt.text != '_more_':
+            yield opt.text, opt['info']
+
+
 
 if __name__=='__main__':
     # Test code to see what this can do
