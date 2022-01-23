@@ -13,3 +13,4 @@ state.dat
 shib_credentials.py
 build/
 dist/
+_minervaclient_test.py
