@@ -112,7 +112,7 @@ def parse_schedule(text,separate_wait = True):
         entry['date_range'] = d_range
 
         
-        if ('wait_pos' in entry and 'wait_pos' is not None and separate_wait) or entry['_status_desc'] == 'W':
+        if (entry is not None and 'wait_pos' in entry and separate_wait) or entry['_status_desc'] == 'W':
             wait_entries.append(entry)
         else:
             entries.append(entry)

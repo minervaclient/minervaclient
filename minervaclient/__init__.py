@@ -1,4 +1,4 @@
-from . import *
+from . import reg, sched, exams, transcript, minerva_common, config, pub_search, mercury_search, ecalendar_search
 
 __version__ = '0.0.0'
 """ September 1, 2017 (nicholaspaun)
@@ -41,7 +41,7 @@ New Fixes:
 
 """
 
-__version__='1.2.0'
+__version__ = '1.2.0'
 """ Version 1.2.0 - June 25, 2018
 New Features:
 
@@ -59,7 +59,7 @@ Fixed Bugs:
 - Fixed login-help bug in the interpreter
 """
 
-__version__='1.3.0'
+__version__ = '1.3.0'
 """ Version 1.3.0 - July 17, 2018
 
 New Features:
@@ -89,6 +89,3 @@ Bug Fixes:
 - Public Search is now case insensitive to course codes
 
 """
-
-__all__ = ['reg','sched','exams','transcript','minerva_common','config','pub_search', 'mercury_search', 'ecalendar_search']
-
